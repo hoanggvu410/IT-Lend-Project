@@ -1,9 +1,9 @@
 """
 user/routes.py — Module giao diện sinh viên (Thành viên B đảm nhận)
-Routes: /   /equipment/<id>   /my-requests   /request/new
+Routes: /   /equipment/<id>   /my-requests   /request/new   /api/suggestions
 """
 from datetime import date as dt_date
-from flask import render_template, redirect, url_for, flash, request
+from flask import render_template, redirect, url_for, flash, request, jsonify
 from flask_login import login_required, current_user
 
 from . import user_bp
@@ -21,13 +21,49 @@ def index():
     if current_user.role == 'admin':
         return redirect(url_for('admin.dashboard'))
 
-    # TODO (Thành viên B): Thêm phân trang, lazy load ảnh
-    equipments = Equipment.query.order_by(Equipment.status.asc()).all()
+    page        = request.args.get('page', 1, type=int)
+    category_id = request.args.get('category', type=int)
+    search_q    = request.args.get('q', '').strip()
+    per_page    = 8
+
+    eq_query = Equipment.query.order_by(Equipment.status.asc())
+    if category_id:
+        eq_query = eq_query.filter_by(category_id=category_id)
+    if search_q:
+        eq_query = eq_query.filter(Equipment.name.ilike(f'%{search_q}%'))
+
+    pagination = eq_query.paginate(page=page, per_page=per_page, error_out=False)
     categories = Category.query.all()
+
     return render_template('user/index.html',
-                           equipments=equipments,
+                           equipments=pagination.items,
+                           pagination=pagination,
                            categories=categories,
-                           query='')
+                           selected_category=category_id,
+                           query=search_q)
+
+
+# ─────────────────────────────────────────────
+#  /api/suggestions  — Gợi ý tìm kiếm (AJAX)
+# ─────────────────────────────────────────────
+@user_bp.route('/api/suggestions')
+@login_required
+def suggestions():
+    q = request.args.get('q', '').strip()
+    if len(q) < 1:
+        return jsonify([])
+
+    results = Equipment.query\
+        .filter(Equipment.name.ilike(f'%{q}%'))\
+        .limit(6)\
+        .all()
+
+    return jsonify([{
+        'id':       eq.id,
+        'name':     eq.name,
+        'category': eq.category.name,
+        'status':   eq.status
+    } for eq in results])
 
 
 # ─────────────────────────────────────────────
@@ -36,11 +72,20 @@ def index():
 @user_bp.route('/equipment/<int:equipment_id>')
 @login_required
 def equipment_detail(equipment_id):
-    # TODO (Thành viên B): Hiển thị lịch sử mượn của thiết bị
     equipment = Equipment.query.get_or_404(equipment_id)
+
+    # Lịch sử mượn của thiết bị (Approved + Returned, 5 lần gần nhất)
+    borrow_history = Request.query\
+        .filter_by(equipment_id=equipment_id)\
+        .filter(Request.status.in_(['Approved', 'Returned']))\
+        .order_by(Request.created_at.desc())\
+        .limit(5)\
+        .all()
+
     return render_template('user/equipment_detail.html',
                            equipment=equipment,
-                           today=dt_date.today())
+                           today=dt_date.today(),
+                           borrow_history=borrow_history)
 
 
 # ─────────────────────────────────────────────

@@ -44,6 +44,7 @@
                     <dt class="col-sm-4 text-muted small">Serial Number</dt>
                     <dd class="col-sm-8 font-monospace">{{ equipment.serial_number }}</dd>
 
+
                     <dt class="col-sm-4 text-muted small">Trạng thái</dt>
                     <dd class="col-sm-8">
                         {% if equipment.status == 'Available' %}
@@ -112,14 +113,65 @@
         </div>
     </div>
 </div>
+
+<!-- ── Lịch sử mượn thiết bị ── -->
+{% if borrow_history %}
+<div class="card border-0 shadow-sm mt-4">
+    <div class="card-header bg-white py-3">
+        <h6 class="mb-0 fw-bold" style="color:#2C3E50;">
+            <i class="bi bi-clock-history me-2"></i>Lịch sử mượn gần đây
+        </h6>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-sm table-hover align-middle mb-0">
+                <thead style="background:#f4f6f9;">
+                    <tr>
+                        <th class="px-4 py-2 text-muted small">Người mượn</th>
+                        <th class="py-2 text-muted small">Ngày mượn</th>
+                        <th class="py-2 text-muted small">Ngày trả dự kiến</th>
+                        <th class="py-2 text-muted small">Trạng thái</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for h in borrow_history %}
+                    <tr>
+                        <td class="px-4">
+                            <i class="bi bi-person me-1 text-muted"></i>{{ h.user.username }}
+                        </td>
+                        <td>{{ h.borrow_date.strftime('%d/%m/%Y') }}</td>
+                        <td>{{ h.return_date.strftime('%d/%m/%Y') }}</td>
+                        <td>
+                            {% if h.status == 'Approved' %}
+                                <span class="badge" style="background:#27AE60;">Đang mượn</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Đã trả</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 {% endblock %}
 
 {% block scripts %}
 <script>
-// TODO (Thành viên C): Validation ngày trả phải > ngày mượn
 document.getElementById('borrowDate')?.addEventListener('change', function () {
     const returnInput = document.getElementById('returnDate');
-    if (returnInput) returnInput.min = this.value;
+    if (returnInput) {
+        const selected = new Date(this.value);
+        selected.setDate(selected.getDate() + 1);
+        const minReturn = selected.toISOString().split('T')[0];
+        returnInput.min = minReturn;
+        if (returnInput.value && returnInput.value <= this.value) {
+            returnInput.value = minReturn;
+        }
+    }
 });
 </script>
 {% endblock %}
