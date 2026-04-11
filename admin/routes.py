@@ -2,6 +2,7 @@
 admin/routes.py — Module quản trị (Thành viên A đảm nhận)
 Routes (prefix /admin): /  /dashboard  /equipments  /categories  /approve
 """
+from datetime import date
 from functools import wraps
 from flask import render_template, redirect, url_for, flash, request
 from flask_login import login_required, current_user
@@ -76,7 +77,6 @@ def equipments():
 @login_required
 @admin_required
 def add_equipment():
-    # TODO (Thành viên A): Hoàn thiện form thêm thiết bị
     name          = request.form.get('name', '').strip()
     serial_number = request.form.get('serial_number', '').strip()
     category_id   = request.form.get('category_id', type=int)
@@ -103,8 +103,7 @@ def add_equipment():
 @login_required
 @admin_required
 def edit_equipment(eq_id):
-    # TODO (Thành viên A): Hoàn thiện chỉnh sửa thiết bị
-    eq = Equipment.query.get_or_404(eq_id)
+    eq             = Equipment.query.get_or_404(eq_id)
     eq.name        = request.form.get('name', eq.name).strip()
     eq.status      = request.form.get('status', eq.status)
     eq.image_url   = request.form.get('image_url', eq.image_url) or None
@@ -118,7 +117,6 @@ def edit_equipment(eq_id):
 @login_required
 @admin_required
 def delete_equipment(eq_id):
-    # TODO (Thành viên A): Kiểm tra ràng buộc trước khi xóa
     eq = Equipment.query.get_or_404(eq_id)
     if eq.status == 'Borrowed':
         flash('Không thể xóa thiết bị đang được mượn.', 'danger')
@@ -130,13 +128,12 @@ def delete_equipment(eq_id):
 
 
 # ─────────────────────────────────────────────
-#  /admin/categories  — Quản lý danh mục
+#  /admin/categories  — Quản lý danh mục (CRUD)
 # ─────────────────────────────────────────────
 @admin_bp.route('/categories')
 @login_required
 @admin_required
 def categories():
-    # TODO (Thành viên A): Thêm CRUD cho Category
     all_categories = Category.query.all()
     return render_template('admin/categories.html', categories=all_categories)
 
@@ -163,13 +160,12 @@ def add_category():
 @login_required
 @admin_required
 def edit_category(cat_id):
-    cat = Category.query.get_or_404(cat_id)
+    cat      = Category.query.get_or_404(cat_id)
     new_name = request.form.get('name', '').strip()
     new_desc = request.form.get('description', '').strip() or None
     if not new_name:
         flash('Tên danh mục không được để trống.', 'danger')
         return redirect(url_for('admin.categories'))
-    # Kiểm tra trùng tên với danh mục khác
     existing = Category.query.filter_by(name=new_name).first()
     if existing and existing.id != cat_id:
         flash('Tên danh mục đã tồn tại.', 'danger')
@@ -186,9 +182,12 @@ def edit_category(cat_id):
 @admin_required
 def delete_category(cat_id):
     cat = Category.query.get_or_404(cat_id)
-    # Ràng buộc: không xóa nếu còn thiết bị thuộc danh mục này
     if cat.equipments:
-        flash(f'Không thể xóa danh mục "{cat.name}" vì còn {len(cat.equipments)} thiết bị liên quan.', 'danger')
+        flash(
+            f'Không thể xóa danh mục "{cat.name}" vì còn '
+            f'{len(cat.equipments)} thiết bị liên quan.',
+            'danger'
+        )
         return redirect(url_for('admin.categories'))
     db.session.delete(cat)
     db.session.commit()
@@ -222,11 +221,7 @@ def approve_requests():
 @login_required
 @admin_required
 def request_action(req_id):
-    """
-    Xử lý nút Approve / Reject / Confirm Return
-    TODO (Thành viên A): Hoàn thiện logic cập nhật trạng thái
-    """
-    from datetime import date
+    """Xử lý nút Approve / Reject / Confirm Return."""
     req        = Request.query.get_or_404(req_id)
     action     = request.form.get('action')
     admin_note = request.form.get('admin_note', '').strip() or None
@@ -234,7 +229,7 @@ def request_action(req_id):
     if action == 'approve' and req.status == 'Pending':
         req.status           = 'Approved'
         req.admin_note       = admin_note
-        req.equipment.status = 'Borrowed'   # Ràng buộc nghiệp vụ
+        req.equipment.status = 'Borrowed'       # Ràng buộc nghiệp vụ
         flash(f'Đã duyệt yêu cầu #{req.id}.', 'success')
 
     elif action == 'reject' and req.status == 'Pending':
@@ -243,9 +238,9 @@ def request_action(req_id):
         flash(f'Đã từ chối yêu cầu #{req.id}.', 'warning')
 
     elif action == 'confirm_return' and req.status == 'Approved':
-        req.status               = 'Returned'
-        req.actual_return_date   = date.today()
-        req.equipment.status     = 'Available'  # Ràng buộc nghiệp vụ
+        req.status             = 'Returned'
+        req.actual_return_date = date.today()
+        req.equipment.status   = 'Available'    # Ràng buộc nghiệp vụ
         flash(f'Đã xác nhận trả thiết bị cho yêu cầu #{req.id}.', 'success')
 
     else:
@@ -254,4 +249,3 @@ def request_action(req_id):
 
     db.session.commit()
     return redirect(url_for('admin.approve_requests'))
-
