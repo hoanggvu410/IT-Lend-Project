@@ -28,8 +28,7 @@
                 <select class="form-select" name="category">
                     <option value="">-- Tất cả danh mục --</option>
                     {% for cat in categories %}
-                    <option value="{{ cat.id }}"
-                        {% if selected_category == cat.id %}selected{% endif %}>
+                    <option value="{{ cat.id }}" {{ 'selected' if selected_category == cat.id else '' }}>
                         {{ cat.name }}
                     </option>
                     {% endfor %}

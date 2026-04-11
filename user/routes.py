@@ -17,9 +17,9 @@ from models import Equipment, Category, Request
 @user_bp.route('/')
 @login_required
 def index():
-    # Admin chuyển thẳng sang dashboard
-    if current_user.role == 'admin':
-        return redirect(url_for('admin.dashboard'))
+    student_guard = _ensure_student()
+    if student_guard:
+        return student_guard
 
     page        = request.args.get('page', 1, type=int)
     category_id = request.args.get('category', type=int)
@@ -72,6 +72,10 @@ def suggestions():
 @user_bp.route('/equipment/<int:equipment_id>')
 @login_required
 def equipment_detail(equipment_id):
+    student_guard = _ensure_student()
+    if student_guard:
+        return student_guard
+
     equipment = Equipment.query.get_or_404(equipment_id)
 
     # Lịch sử mượn của thiết bị (Approved + Returned, 5 lần gần nhất)
@@ -94,6 +98,10 @@ def equipment_detail(equipment_id):
 @user_bp.route('/my-requests')
 @login_required
 def my_requests():
+    student_guard = _ensure_student()
+    if student_guard:
+        return student_guard
+
     # Lọc theo user_id — chỉ thấy lịch sử của chính mình (Ràng buộc quyền hạn)
     requests = Request.query\
         .filter_by(user_id=current_user.id)\
@@ -108,6 +116,10 @@ def my_requests():
 @user_bp.route('/request/new', methods=['POST'])
 @login_required
 def new_request():
+    student_guard = _ensure_student()
+    if student_guard:
+        return student_guard
+
     """
     TODO (Thành viên B + C): Hoàn thiện form và validation
     Logic nghiệp vụ (Ràng buộc từ spec):
@@ -123,7 +135,6 @@ def new_request():
         flash('Vui lòng điền đầy đủ thông tin.', 'danger')
         return redirect(url_for('user.index'))
 
-    from datetime import date as parse_date
     try:
         bd = dt_date.fromisoformat(borrow_date)
         rd = dt_date.fromisoformat(return_date)
@@ -155,4 +166,12 @@ def new_request():
 
     flash(f'Gửi yêu cầu mượn "{equipment.name}" thành công! Vui lòng chờ Admin duyệt.', 'success')
     return redirect(url_for('user.my_requests'))
+
+
+def _ensure_student():
+    if current_user.role == 'admin':
+        flash('Admin không thao tác ở khu vực người dùng.', 'warning')
+        return redirect(url_for('admin.dashboard'))
+    return None
+
 
