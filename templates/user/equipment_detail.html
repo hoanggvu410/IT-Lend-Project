@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+{% block title %}{{ equipment.name }}{% endblock %}
+{% block page_title %}Chi tiết thiết bị{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+
+    <!-- ── Image Column ── -->
+    <div class="col-md-4">
+        {% if equipment.image_url %}
+        <img src="{{ equipment.image_url }}" class="img-fluid rounded shadow-sm"
+             alt="{{ equipment.name }}" style="width:100%; object-fit:cover; max-height:300px;">
+        {% else %}
+        <div class="d-flex align-items-center justify-content-center rounded shadow-sm bg-light"
+             style="height:280px;">
+            {% if 'Laptop' in equipment.category.name %}
+                <i class="bi bi-laptop text-muted" style="font-size:6rem;"></i>
+            {% elif 'chiếu' in equipment.category.name %}
+                <i class="bi bi-projector text-muted" style="font-size:6rem;"></i>
+            {% elif 'IoT' in equipment.category.name %}
+                <i class="bi bi-cpu text-muted" style="font-size:6rem;"></i>
+            {% else %}
+                <i class="bi bi-device-hdd text-muted" style="font-size:6rem;"></i>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <a href="{{ url_for('user.index') }}" class="btn btn-outline-secondary w-100 mt-3">
+            <i class="bi bi-arrow-left me-2"></i>Quay lại danh sách
+        </a>
+    </div>
+
+    <!-- ── Detail Column ── -->
+    <div class="col-md-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <h4 class="fw-bold mb-1" style="color:#2C3E50;">{{ equipment.name }}</h4>
+                <p class="text-muted mb-3">
+                    <i class="bi bi-tag me-1"></i>{{ equipment.category.name }}
+                </p>
+                <hr>
+
+                <dl class="row mb-3">
+                    <dt class="col-sm-4 text-muted small">Serial Number</dt>
+                    <dd class="col-sm-8 font-monospace">{{ equipment.serial_number }}</dd>
+
+                    <dt class="col-sm-4 text-muted small">Trạng thái</dt>
+                    <dd class="col-sm-8">
+                        {% if equipment.status == 'Available' %}
+                            <span class="badge" style="background:#27AE60;">
+                                <i class="bi bi-check-circle me-1"></i>Sẵn sàng cho mượn
+                            </span>
+                        {% elif equipment.status == 'Borrowed' %}
+                            <span class="badge" style="background:#E74C3C;">
+                                <i class="bi bi-arrow-up-right-circle me-1"></i>Đang được mượn
+                            </span>
+                        {% else %}
+                            <span class="badge bg-warning text-dark">
+                                <i class="bi bi-tools me-1"></i>Đang bảo trì
+                            </span>
+                        {% endif %}
+                    </dd>
+                </dl>
+
+                {% if equipment.status == 'Available' %}
+                <hr>
+                <h6 class="fw-bold mb-3" style="color:#2C3E50;">
+                    <i class="bi bi-calendar-plus me-2"></i>Đăng ký mượn
+                </h6>
+
+                <!-- TODO (Thành viên B): Thêm date-picker đẹp và validate JS phía client -->
+                <form method="POST" action="{{ url_for('user.new_request') }}" id="borrowForm">
+                    <input type="hidden" name="equipment_id" value="{{ equipment.id }}">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold small">
+                                Ngày mượn <span class="text-danger">*</span>
+                            </label>
+                            <input type="date" class="form-control" name="borrow_date"
+                                   id="borrowDate" required min="{{ today }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold small">
+                                Ngày trả dự kiến <span class="text-danger">*</span>
+                            </label>
+                            <input type="date" class="form-control" name="return_date"
+                                   id="returnDate" required min="{{ today }}">
+                        </div>
+                    </div>
+                    <div class="alert alert-info mt-3 small py-2" role="alert">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Yêu cầu sẽ được gửi cho Admin duyệt. Bạn sẽ thấy kết quả trong mục
+                        <strong>Lịch sử mượn</strong>.
+                    </div>
+                    <div class="mt-3 d-flex gap-2">
+                        <button type="submit" class="btn text-white px-4 fw-semibold"
+                                style="background:#3498DB;">
+                            <i class="bi bi-send me-2"></i>Gửi yêu cầu
+                        </button>
+                        <a href="{{ url_for('user.index') }}" class="btn btn-outline-secondary">Hủy</a>
+                    </div>
+                </form>
+
+                {% else %}
+                <div class="alert alert-warning mt-3" role="alert">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    Thiết bị này hiện <strong>không khả dụng</strong> để mượn.
+                </div>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// TODO (Thành viên C): Validation ngày trả phải > ngày mượn
+document.getElementById('borrowDate')?.addEventListener('change', function () {
+    const returnInput = document.getElementById('returnDate');
+    if (returnInput) returnInput.min = this.value;
+});
+</script>
+{% endblock %}
+

@@ -1,0 +1,57 @@
+{% extends 'base_auth.html' %}
+{% block title %}Đăng nhập{% endblock %}
+
+{% block content %}
+<div class="card shadow-lg" style="width:420px; border-radius:16px; overflow:hidden;">
+
+    <!-- Card Header -->
+    <div class="card-header text-center py-4" style="background:#2C3E50;">
+        <i class="bi bi-pc-display-horizontal text-white" style="font-size:2.5rem;"></i>
+        <h4 class="text-white mt-2 mb-1 fw-bold">IT-Lend</h4>
+        <small class="text-white-50">Hệ thống mượn thiết bị Lab</small>
+    </div>
+
+    <!-- Card Body -->
+    <div class="card-body p-4">
+        <h5 class="text-center mb-4 fw-semibold" style="color:#2C3E50;">Đăng nhập</h5>
+
+        <form method="POST" action="{{ url_for('auth.login') }}">
+            <div class="mb-3">
+                <label for="username" class="form-label fw-semibold small">Tên đăng nhập</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-person"></i></span>
+                    <input type="text" class="form-control" id="username" name="username"
+                           placeholder="Nhập tên đăng nhập" required autofocus>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="password" class="form-label fw-semibold small">Mật khẩu</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                    <input type="password" class="form-control" id="password" name="password"
+                           placeholder="Nhập mật khẩu" required>
+                </div>
+            </div>
+
+            <div class="mb-4 form-check">
+                <input type="checkbox" class="form-check-input" id="remember" name="remember">
+                <label class="form-check-label small" for="remember">Ghi nhớ đăng nhập</label>
+            </div>
+
+            <button type="submit" class="btn w-100 fw-semibold text-white py-2"
+                    style="background:#3498DB; border:none;">
+                <i class="bi bi-box-arrow-in-right me-2"></i>Đăng nhập
+            </button>
+        </form>
+
+        <hr class="my-3">
+        <p class="text-center mb-0 text-muted small">
+            Chưa có tài khoản?
+            <a href="{{ url_for('auth.register') }}" class="fw-semibold text-decoration-none"
+               style="color:#3498DB;">Đăng ký ngay</a>
+        </p>
+    </div>
+</div>
+{% endblock %}
+

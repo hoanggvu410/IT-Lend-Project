@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard Admin{% endblock %}
+{% block page_title %}Dashboard quản trị{% endblock %}
+
+{% block content %}
+
+<!-- ── Stat Cards ── -->
+<div class="row g-4 mb-4">
+    <div class="col-sm-6 col-xl-3">
+        <div class="card border-0 shadow-sm stat-card">
+            <div class="card-body d-flex align-items-center gap-3" style="border-left:4px solid #3498DB;">
+                <div class="flex-grow-1">
+                    <div class="text-muted small fw-semibold text-uppercase mb-1">Tổng thiết bị</div>
+                    <div class="fs-2 fw-bold" style="color:#2C3E50;">{{ total_equipment }}</div>
+                </div>
+                <i class="bi bi-laptop opacity-25" style="font-size:3rem; color:#3498DB;"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card border-0 shadow-sm stat-card">
+            <div class="card-body d-flex align-items-center gap-3" style="border-left:4px solid #27AE60;">
+                <div class="flex-grow-1">
+                    <div class="text-muted small fw-semibold text-uppercase mb-1">Sẵn sàng</div>
+                    <div class="fs-2 fw-bold" style="color:#27AE60;">{{ available_count }}</div>
+                </div>
+                <i class="bi bi-check-circle opacity-25" style="font-size:3rem; color:#27AE60;"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card border-0 shadow-sm stat-card">
+            <div class="card-body d-flex align-items-center gap-3" style="border-left:4px solid #E74C3C;">
+                <div class="flex-grow-1">
+                    <div class="text-muted small fw-semibold text-uppercase mb-1">Đang cho mượn</div>
+                    <div class="fs-2 fw-bold" style="color:#E74C3C;">{{ borrowed_count }}</div>
+                </div>
+                <i class="bi bi-arrow-up-right-circle opacity-25" style="font-size:3rem; color:#E74C3C;"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card border-0 shadow-sm stat-card">
+            <div class="card-body d-flex align-items-center gap-3" style="border-left:4px solid #F39C12;">
+                <div class="flex-grow-1">
+                    <div class="text-muted small fw-semibold text-uppercase mb-1">Chờ duyệt</div>
+                    <div class="fs-2 fw-bold" style="color:#F39C12;">{{ pending_requests }}</div>
+                </div>
+                <i class="bi bi-hourglass-split opacity-25" style="font-size:3rem; color:#F39C12;"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── Quick Actions ── -->
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <a href="{{ url_for('admin.approve_requests') }}"
+           class="card border-0 shadow-sm text-decoration-none quick-action-card">
+            <div class="card-body text-center py-4">
+                <i class="bi bi-check2-square mb-2" style="font-size:2rem; color:#3498DB;"></i>
+                <div class="fw-semibold" style="color:#2C3E50;">Duyệt yêu cầu</div>
+                {% if pending_requests > 0 %}
+                <span class="badge mt-1" style="background:#E74C3C;">{{ pending_requests }} chờ duyệt</span>
+                {% else %}
+                <span class="badge mt-1 bg-secondary">Không có</span>
+                {% endif %}
+            </div>
+        </a>
+    </div>
+    <div class="col-md-4">
+        <a href="{{ url_for('admin.equipments') }}"
+           class="card border-0 shadow-sm text-decoration-none quick-action-card">
+            <div class="card-body text-center py-4">
+                <i class="bi bi-plus-circle mb-2" style="font-size:2rem; color:#27AE60;"></i>
+                <div class="fw-semibold" style="color:#2C3E50;">Thêm thiết bị</div>
+                <span class="badge mt-1 bg-secondary">{{ total_equipment }} thiết bị</span>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-4">
+        <a href="{{ url_for('admin.categories') }}"
+           class="card border-0 shadow-sm text-decoration-none quick-action-card">
+            <div class="card-body text-center py-4">
+                <i class="bi bi-tags mb-2" style="font-size:2rem; color:#9B59B6;"></i>
+                <div class="fw-semibold" style="color:#2C3E50;">Quản lý danh mục</div>
+                <span class="badge mt-1 bg-secondary">{{ total_users }} sinh viên</span>
+            </div>
+        </a>
+    </div>
+</div>
+
+<!-- TODO (Thành viên A): Thêm bảng "Yêu cầu gần đây" và biểu đồ thống kê -->
+<div class="card border-0 shadow-sm">
+    <div class="card-body text-center py-5 text-muted">
+        <i class="bi bi-bar-chart-line d-block mb-3 opacity-25" style="font-size:3rem;"></i>
+        <p class="mb-0">Biểu đồ thống kê sẽ được Thành viên A thêm vào đây.</p>
+    </div>
+</div>
+
+{% endblock %}
+

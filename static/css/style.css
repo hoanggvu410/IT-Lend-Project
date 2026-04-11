@@ -1,0 +1,219 @@
+/* =====================================================
+   IT-Lend — Custom CSS
+   Color Palette:
+     Primary / Sidebar : #2C3E50 (Midnight Blue)
+     Action / Button   : #3498DB (Sky Blue)
+     Success           : #27AE60 (Green)
+     Danger / Warning  : #E74C3C (Red)
+===================================================== */
+
+/* ── Body ── */
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: #f4f6f9;
+}
+
+/* ── Auth page background ── */
+#auth-wrapper {
+    background: linear-gradient(135deg, #2C3E50 0%, #3498DB 100%);
+    min-height: 100vh;
+}
+
+/* ═══════════════════════════════════
+   SIDEBAR
+═══════════════════════════════════ */
+#sidebar {
+    min-height: 100vh;
+    min-width: 240px;
+    max-width: 240px;
+    background: #2C3E50;
+    transition: all 0.25s ease;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+}
+
+#sidebar.collapsed {
+    min-width: 0;
+    max-width: 0;
+    padding: 0 !important;
+    overflow: hidden;
+}
+
+.sidebar-divider {
+    border-color: rgba(255, 255, 255, 0.15) !important;
+    margin: 0.5rem 0;
+}
+
+.sidebar-link {
+    color: rgba(255, 255, 255, 0.8) !important;
+    border-radius: 8px !important;
+    transition: background 0.15s ease, color 0.15s ease;
+    font-size: 0.9rem;
+}
+
+.sidebar-link:hover {
+    background: rgba(255, 255, 255, 0.12) !important;
+    color: #ffffff !important;
+}
+
+.sidebar-link.active {
+    background: #3498DB !important;
+    color: #ffffff !important;
+    font-weight: 600;
+}
+
+/* ═══════════════════════════════════
+   PAGE CONTENT
+═══════════════════════════════════ */
+#page-content-wrapper {
+    background: #f4f6f9;
+    min-height: 100vh;
+}
+
+#wrapper {
+    min-height: 100vh;
+}
+
+/* ── Top Navbar ── */
+.navbar.border-bottom {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+/* ═══════════════════════════════════
+   CARDS
+═══════════════════════════════════ */
+.card {
+    border-radius: 12px !important;
+}
+
+/* Equipment hover card */
+.equipment-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: default;
+}
+.equipment-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 30px rgba(44, 62, 80, 0.14) !important;
+}
+
+/* Stat cards on admin dashboard */
+.stat-card {
+    border-radius: 12px !important;
+    transition: transform 0.2s ease;
+}
+.stat-card:hover {
+    transform: translateY(-2px);
+}
+
+/* Quick action cards */
+.quick-action-card {
+    border-radius: 12px !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    color: inherit !important;
+}
+.quick-action-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(44, 62, 80, 0.12) !important;
+}
+
+/* ═══════════════════════════════════
+   TABLES
+═══════════════════════════════════ */
+.table thead th {
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    font-size: 0.85rem;
+    border: none;
+}
+
+.table tbody td {
+    vertical-align: middle;
+    border-color: #f0f0f0;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(52, 152, 219, 0.05);
+}
+
+/* ═══════════════════════════════════
+   BUTTONS
+═══════════════════════════════════ */
+.btn {
+    border-radius: 8px !important;
+    transition: opacity 0.15s ease, transform 0.1s ease;
+}
+.btn:active {
+    transform: scale(0.97);
+}
+
+/* ═══════════════════════════════════
+   BADGES
+═══════════════════════════════════ */
+.badge {
+    font-size: 0.78rem;
+    padding: 4px 10px;
+    border-radius: 20px !important;
+    font-weight: 500;
+}
+
+/* ═══════════════════════════════════
+   FORMS / INPUT GROUPS
+═══════════════════════════════════ */
+.input-group-text {
+    background: #f8f9fa;
+    border-right: none;
+    color: #6c757d;
+}
+
+.input-group .form-control {
+    border-left: none;
+}
+
+.input-group .form-control:focus {
+    border-color: #3498DB;
+    box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.2);
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: #3498DB;
+    box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.2);
+}
+
+/* ═══════════════════════════════════
+   MODALS
+═══════════════════════════════════ */
+.modal-content {
+    border-radius: 12px !important;
+    border: none;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header {
+    border-radius: 12px 12px 0 0 !important;
+}
+
+/* ═══════════════════════════════════
+   ALERTS
+═══════════════════════════════════ */
+.alert {
+    border-radius: 10px !important;
+    border: none;
+}
+
+/* ═══════════════════════════════════
+   SCROLLBAR (Sidebar)
+═══════════════════════════════════ */
+#sidebar::-webkit-scrollbar {
+    width: 4px;
+}
+#sidebar::-webkit-scrollbar-track {
+    background: transparent;
+}
+#sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+}
+

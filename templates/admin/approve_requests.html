@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% block title %}Duyệt yêu cầu{% endblock %}
+{% block page_title %}Duyệt yêu cầu mượn{% endblock %}
+
+{% block content %}
+
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white py-3 d-flex align-items-center">
+        <h5 class="mb-0 fw-bold" style="color:#2C3E50;">
+            <i class="bi bi-check2-square me-2"></i>Yêu cầu đang chờ duyệt
+        </h5>
+        {% if requests %}
+        <span class="badge ms-2 text-white" style="background:#E74C3C;">{{ requests|length }}</span>
+        {% else %}
+        <span class="badge ms-2 bg-success">Tất cả đã xử lý</span>
+        {% endif %}
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead style="background:#2C3E50; color:white;">
+                    <tr>
+                        <th class="py-3 px-4" style="width:50px;">#</th>
+                        <th class="py-3">Sinh viên</th>
+                        <th class="py-3">Thiết bị</th>
+                        <th class="py-3">Ngày mượn</th>
+                        <th class="py-3">Ngày trả</th>
+                        <th class="py-3">Gửi lúc</th>
+                        <th class="py-3 text-center" style="width:160px;">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for req in requests %}
+                    <tr>
+                        <td class="px-4 text-muted small">{{ req.id }}</td>
+                        <td>
+                            <div class="fw-semibold" style="color:#2C3E50;">{{ req.user.username }}</div>
+                            <div class="text-muted small">{{ req.user.email }}</div>
+                        </td>
+                        <td>
+                            <div class="fw-semibold">{{ req.equipment.name }}</div>
+                            <div class="text-muted small font-monospace">{{ req.equipment.serial_number }}</div>
+                        </td>
+                        <td>{{ req.borrow_date.strftime('%d/%m/%Y') }}</td>
+                        <td>{{ req.return_date.strftime('%d/%m/%Y') }}</td>
+                        <td class="text-muted small">{{ req.created_at.strftime('%d/%m %H:%M') }}</td>
+                        <td class="text-center">
+                            <!-- Approve -->
+                            <form method="POST"
+                                  action="{{ url_for('admin.request_action', req_id=req.id) }}"
+                                  style="display:inline;">
+                                <input type="hidden" name="action" value="approve">
+                                <button class="btn btn-sm text-white me-1"
+                                        style="background:#27AE60;"
+                                        title="Duyệt yêu cầu">
+                                    <i class="bi bi-check-lg"></i>
+                                </button>
+                            </form>
+                            <!-- Reject -->
+                            <button class="btn btn-sm btn-outline-danger"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#rejectModal{{ req.id }}"
+                                    title="Từ chối">
+                                <i class="bi bi-x-lg"></i>
+                            </button>
+                        </td>
+                    </tr>
+
+                    <!-- Reject Modal -->
+                    <div class="modal fade" id="rejectModal{{ req.id }}" tabindex="-1">
+                        <div class="modal-dialog modal-sm">
+                            <div class="modal-content">
+                                <div class="modal-header" style="background:#E74C3C;">
+                                    <h6 class="modal-title text-white">Từ chối yêu cầu #{{ req.id }}</h6>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                </div>
+                                <form method="POST" action="{{ url_for('admin.request_action', req_id=req.id) }}">
+                                    <input type="hidden" name="action" value="reject">
+                                    <div class="modal-body">
+                                        <label class="form-label small fw-semibold">Lý do từ chối</label>
+                                        <textarea class="form-control" name="admin_note" rows="3"
+                                                  placeholder="VD: Thiết bị đang bảo trì..."></textarea>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                        <button type="submit" class="btn btn-sm btn-danger">Từ chối</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-5">
+                            <i class="bi bi-check-circle text-success d-block mb-2" style="font-size:2.5rem;"></i>
+                            <strong>Tuyệt vời!</strong> Không có yêu cầu nào đang chờ duyệt.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+

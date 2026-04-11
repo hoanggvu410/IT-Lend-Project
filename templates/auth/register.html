@@ -1,0 +1,70 @@
+{% extends 'base_auth.html' %}
+{% block title %}Đăng ký tài khoản{% endblock %}
+
+{% block content %}
+<div class="card shadow-lg" style="width:460px; border-radius:16px; overflow:hidden;">
+
+    <!-- Card Header -->
+    <div class="card-header text-center py-4" style="background:#2C3E50;">
+        <i class="bi bi-pc-display-horizontal text-white" style="font-size:2.5rem;"></i>
+        <h4 class="text-white mt-2 mb-1 fw-bold">IT-Lend</h4>
+        <small class="text-white-50">Hệ thống mượn thiết bị Lab</small>
+    </div>
+
+    <!-- Card Body -->
+    <div class="card-body p-4">
+        <h5 class="text-center mb-4 fw-semibold" style="color:#2C3E50;">Tạo tài khoản</h5>
+
+        <form method="POST" action="{{ url_for('auth.register') }}">
+            <div class="mb-3">
+                <label for="username" class="form-label fw-semibold small">Tên đăng nhập</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-person"></i></span>
+                    <input type="text" class="form-control" id="username" name="username"
+                           placeholder="VD: sv2024001" required autofocus>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="email" class="form-label fw-semibold small">Email</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                    <input type="email" class="form-control" id="email" name="email"
+                           placeholder="VD: sv@student.edu.vn" required>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="password" class="form-label fw-semibold small">Mật khẩu</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                    <input type="password" class="form-control" id="password" name="password"
+                           placeholder="Ít nhất 6 ký tự" required>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label for="confirm_password" class="form-label fw-semibold small">Xác nhận mật khẩu</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+                    <input type="password" class="form-control" id="confirm_password" name="confirm_password"
+                           placeholder="Nhập lại mật khẩu" required>
+                </div>
+            </div>
+
+            <button type="submit" class="btn w-100 fw-semibold text-white py-2"
+                    style="background:#27AE60; border:none;">
+                <i class="bi bi-person-plus me-2"></i>Tạo tài khoản
+            </button>
+        </form>
+
+        <hr class="my-3">
+        <p class="text-center mb-0 text-muted small">
+            Đã có tài khoản?
+            <a href="{{ url_for('auth.login') }}" class="fw-semibold text-decoration-none"
+               style="color:#3498DB;">Đăng nhập</a>
+        </p>
+    </div>
+</div>
+{% endblock %}
+

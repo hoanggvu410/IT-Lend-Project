@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% block title %}Lịch sử mượn{% endblock %}
+{% block page_title %}Lịch sử mượn của tôi{% endblock %}
+
+{% block content %}
+
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white py-3 d-flex align-items-center justify-content-between">
+        <h5 class="mb-0 fw-bold" style="color:#2C3E50;">
+            <i class="bi bi-clock-history me-2"></i>Các yêu cầu của tôi
+        </h5>
+        <a href="{{ url_for('user.index') }}" class="btn btn-sm text-white"
+           style="background:#3498DB;">
+            <i class="bi bi-plus me-1"></i>Mượn thêm
+        </a>
+    </div>
+
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead style="background:#2C3E50; color:white;">
+                    <tr>
+                        <th class="py-3 px-4" style="width:50px;">#</th>
+                        <th class="py-3">Thiết bị</th>
+                        <th class="py-3">Ngày mượn</th>
+                        <th class="py-3">Ngày trả dự kiến</th>
+                        <th class="py-3">Trạng thái</th>
+                        <th class="py-3">Ghi chú Admin</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for req in requests %}
+                    <tr class="{{ 'table-danger' if req.is_overdue }}">
+                        <td class="px-4 text-muted small">{{ req.id }}</td>
+                        <td>
+                            <div class="fw-semibold" style="color:#2C3E50;">
+                                {{ req.equipment.name }}
+                            </div>
+                            <div class="text-muted small font-monospace">
+                                {{ req.equipment.serial_number }}
+                            </div>
+                        </td>
+                        <td>{{ req.borrow_date.strftime('%d/%m/%Y') }}</td>
+                        <td>
+                            {{ req.return_date.strftime('%d/%m/%Y') }}
+                            {% if req.is_overdue %}
+                            <span class="badge ms-1" style="background:#E74C3C;">
+                                <i class="bi bi-exclamation-triangle me-1"></i>Quá hạn!
+                            </span>
+                            {% endif %}
+                            {% if req.actual_return_date %}
+                            <div class="text-muted small">
+                                <i class="bi bi-check me-1"></i>
+                                Đã trả: {{ req.actual_return_date.strftime('%d/%m/%Y') }}
+                            </div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if req.status == 'Pending' %}
+                                <span class="badge bg-warning text-dark">
+                                    <i class="bi bi-hourglass-split me-1"></i>Chờ duyệt
+                                </span>
+                            {% elif req.status == 'Approved' %}
+                                <span class="badge" style="background:#27AE60;">
+                                    <i class="bi bi-check-circle me-1"></i>Đã duyệt
+                                </span>
+                            {% elif req.status == 'Rejected' %}
+                                <span class="badge" style="background:#E74C3C;">
+                                    <i class="bi bi-x-circle me-1"></i>Bị từ chối
+                                </span>
+                            {% elif req.status == 'Returned' %}
+                                <span class="badge bg-secondary">
+                                    <i class="bi bi-check2-all me-1"></i>Đã trả
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td class="text-muted small">
+                            {{ req.admin_note or '—' }}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-5">
+                            <i class="bi bi-inbox d-block mb-3 opacity-25" style="font-size:3rem;"></i>
+                            <p class="mb-2">Bạn chưa có yêu cầu mượn nào.</p>
+                            <a href="{{ url_for('user.index') }}" class="btn btn-sm text-white"
+                               style="background:#3498DB;">
+                                <i class="bi bi-laptop me-1"></i>Xem thiết bị ngay
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+

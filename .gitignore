@@ -1,0 +1,38 @@
+# ============================
+#  IT-Lend — .gitignore
+# ============================
+
+# Python virtual environment
+venv/
+env/
+.venv/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# SQLite database (generated at runtime)
+*.db
+*.sqlite3
+instance/
+
+# Flask secret / env files
+.env
+.flaskenv
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+

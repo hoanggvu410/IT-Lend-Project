@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+{% block title %}Quản lý thiết bị{% endblock %}
+{% block page_title %}Quản lý thiết bị{% endblock %}
+
+{% block content %}
+
+<!-- Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h5 class="mb-0 fw-bold" style="color:#2C3E50;">
+        Danh sách thiết bị
+        <span class="badge ms-2 bg-secondary">{{ equipments|length }}</span>
+    </h5>
+    <button class="btn text-white fw-semibold" style="background:#3498DB;"
+            data-bs-toggle="modal" data-bs-target="#addEquipmentModal">
+        <i class="bi bi-plus-circle me-2"></i>Thêm thiết bị
+    </button>
+</div>
+
+<!-- Table -->
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead style="background:#2C3E50; color:white;">
+                    <tr>
+                        <th class="py-3 px-4" style="width:50px;">#</th>
+                        <th class="py-3">Tên thiết bị</th>
+                        <th class="py-3">Serial</th>
+                        <th class="py-3">Danh mục</th>
+                        <th class="py-3">Trạng thái</th>
+                        <th class="py-3 text-center" style="width:120px;">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for eq in equipments %}
+                    <tr>
+                        <td class="px-4 text-muted small">{{ eq.id }}</td>
+                        <td>
+                            <div class="fw-semibold" style="color:#2C3E50;">{{ eq.name }}</div>
+                        </td>
+                        <td class="text-muted small font-monospace">{{ eq.serial_number }}</td>
+                        <td>
+                            <span class="badge bg-light text-dark border">{{ eq.category.name }}</span>
+                        </td>
+                        <td>
+                            {% if eq.status == 'Available' %}
+                                <span class="badge" style="background:#27AE60;">
+                                    <i class="bi bi-check-circle me-1"></i>Sẵn sàng
+                                </span>
+                            {% elif eq.status == 'Borrowed' %}
+                                <span class="badge" style="background:#E74C3C;">
+                                    <i class="bi bi-arrow-up-right-circle me-1"></i>Đang mượn
+                                </span>
+                            {% else %}
+                                <span class="badge bg-warning text-dark">
+                                    <i class="bi bi-tools me-1"></i>Bảo trì
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            <!-- TODO (Thành viên A): Mở modal Edit với dữ liệu sẵn -->
+                            <button class="btn btn-sm btn-outline-primary me-1"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#editEquipmentModal{{ eq.id }}"
+                                    title="Chỉnh sửa">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <form method="POST"
+                                  action="{{ url_for('admin.delete_equipment', eq_id=eq.id) }}"
+                                  style="display:inline;"
+                                  onsubmit="return confirm('Xóa thiết bị {{ eq.name }}?')">
+                                <button class="btn btn-sm btn-outline-danger" title="Xóa">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+
+                    <!-- Edit Modal cho từng thiết bị -->
+                    <div class="modal fade" id="editEquipmentModal{{ eq.id }}" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header" style="background:#2C3E50;">
+                                    <h5 class="modal-title text-white">
+                                        <i class="bi bi-pencil me-2"></i>Chỉnh sửa thiết bị
+                                    </h5>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                </div>
+                                <form method="POST" action="{{ url_for('admin.edit_equipment', eq_id=eq.id) }}">
+                                    <div class="modal-body">
+                                        <div class="mb-3">
+                                            <label class="form-label fw-semibold small">Tên thiết bị</label>
+                                            <input type="text" class="form-control" name="name" value="{{ eq.name }}" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label fw-semibold small">Danh mục</label>
+                                            <select class="form-select" name="category_id">
+                                                {% for cat in categories %}
+                                                <option value="{{ cat.id }}" {{ 'selected' if cat.id == eq.category_id }}>
+                                                    {{ cat.name }}
+                                                </option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label fw-semibold small">Trạng thái</label>
+                                            <select class="form-select" name="status">
+                                                <option value="Available"    {{ 'selected' if eq.status == 'Available' }}>Sẵn sàng</option>
+                                                <option value="Borrowed"     {{ 'selected' if eq.status == 'Borrowed' }}>Đang mượn</option>
+                                                <option value="Maintenance"  {{ 'selected' if eq.status == 'Maintenance' }}>Bảo trì</option>
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label fw-semibold small">URL ảnh (tuỳ chọn)</label>
+                                            <input type="url" class="form-control" name="image_url"
+                                                   value="{{ eq.image_url or '' }}" placeholder="https://...">
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                        <button type="submit" class="btn text-white" style="background:#3498DB;">Lưu</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-5">
+                            <i class="bi bi-inbox d-block mb-2" style="font-size:2rem;"></i>
+                            Chưa có thiết bị nào. Hãy thêm thiết bị đầu tiên!
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- ── Modal Thêm thiết bị ── -->
+<div class="modal fade" id="addEquipmentModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="background:#2C3E50;">
+                <h5 class="modal-title text-white">
+                    <i class="bi bi-plus-circle me-2"></i>Thêm thiết bị mới
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('admin.add_equipment') }}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Tên thiết bị <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="name"
+                               placeholder="VD: Laptop Dell Latitude 5420" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Serial Number <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="serial_number"
+                               placeholder="VD: DELL-003" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Danh mục <span class="text-danger">*</span></label>
+                        <select class="form-select" name="category_id" required>
+                            <option value="">-- Chọn danh mục --</option>
+                            {% for cat in categories %}
+                            <option value="{{ cat.id }}">{{ cat.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">URL ảnh (tuỳ chọn)</label>
+                        <input type="url" class="form-control" name="image_url" placeholder="https://...">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn text-white fw-semibold" style="background:#27AE60;">
+                        <i class="bi bi-plus-circle me-1"></i>Thêm
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
