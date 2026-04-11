@@ -24,6 +24,7 @@ instance/
 
 # IDE
 .idea/
+.idea
 .vscode/
 *.iml
 
