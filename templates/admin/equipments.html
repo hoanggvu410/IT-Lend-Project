@@ -5,7 +5,7 @@
 {% block content %}
 
 <!-- Header -->
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex justify-content-between align-items-center mb-3">
     <h5 class="mb-0 fw-bold" style="color:#2C3E50;">
         Danh sách thiết bị
         <span class="badge ms-2 bg-secondary">{{ equipments|length }}</span>
@@ -14,6 +14,30 @@
             data-bs-toggle="modal" data-bs-target="#addEquipmentModal">
         <i class="bi bi-plus-circle me-2"></i>Thêm thiết bị
     </button>
+</div>
+
+<!-- Filter Pills -->
+<div class="mb-4 d-flex flex-wrap gap-2">
+    <a href="{{ url_for('admin.equipments') }}"
+       class="btn btn-sm {{ 'text-white' if not status_filter else 'btn-outline-secondary' }}"
+       style="{{ 'background:#2C3E50;' if not status_filter else '' }}">
+        <i class="bi bi-grid me-1"></i>Tất cả
+    </a>
+    <a href="{{ url_for('admin.equipments', status='Available') }}"
+       class="btn btn-sm {{ 'text-white' if status_filter == 'Available' else 'btn-outline-success' }}"
+       style="{{ 'background:#27AE60;' if status_filter == 'Available' else '' }}">
+        <i class="bi bi-check-circle me-1"></i>Sẵn sàng
+    </a>
+    <a href="{{ url_for('admin.equipments', status='Borrowed') }}"
+       class="btn btn-sm {{ 'text-white' if status_filter == 'Borrowed' else 'btn-outline-danger' }}"
+       style="{{ 'background:#E74C3C;' if status_filter == 'Borrowed' else '' }}">
+        <i class="bi bi-arrow-up-right-circle me-1"></i>Đang mượn
+    </a>
+    <a href="{{ url_for('admin.equipments', status='Maintenance') }}"
+       class="btn btn-sm {{ 'text-white' if status_filter == 'Maintenance' else 'btn-outline-warning' }}"
+       style="{{ 'background:#F39C12;' if status_filter == 'Maintenance' else '' }}">
+        <i class="bi bi-tools me-1"></i>Bảo trì
+    </a>
 </div>
 
 <!-- Table -->

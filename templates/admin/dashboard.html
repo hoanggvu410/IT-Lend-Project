@@ -90,11 +90,62 @@
     </div>
 </div>
 
-<!-- TODO (Thành viên A): Thêm bảng "Yêu cầu gần đây" và biểu đồ thống kê -->
+<!-- ── Bảng Yêu cầu gần đây ── -->
 <div class="card border-0 shadow-sm">
-    <div class="card-body text-center py-5 text-muted">
-        <i class="bi bi-bar-chart-line d-block mb-3 opacity-25" style="font-size:3rem;"></i>
-        <p class="mb-0">Biểu đồ thống kê sẽ được Thành viên A thêm vào đây.</p>
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+        <h6 class="mb-0 fw-bold" style="color:#2C3E50;">
+            <i class="bi bi-clock-history me-2"></i>Yêu cầu gần đây
+        </h6>
+        <a href="{{ url_for('admin.approve_requests') }}" class="btn btn-sm btn-outline-secondary">
+            Xem tất cả <i class="bi bi-arrow-right ms-1"></i>
+        </a>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead style="background:#f8f9fa;">
+                    <tr>
+                        <th class="py-2 px-4 small text-muted">#</th>
+                        <th class="py-2 small text-muted">Sinh viên</th>
+                        <th class="py-2 small text-muted">Thiết bị</th>
+                        <th class="py-2 small text-muted">Ngày mượn</th>
+                        <th class="py-2 small text-muted">Trạng thái</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for req in recent_requests %}
+                    <tr>
+                        <td class="px-4 text-muted small">{{ req.id }}</td>
+                        <td>
+                            <div class="fw-semibold small" style="color:#2C3E50;">{{ req.user.username }}</div>
+                        </td>
+                        <td class="small">{{ req.equipment.name }}</td>
+                        <td class="small text-muted">{{ req.borrow_date.strftime('%d/%m/%Y') }}</td>
+                        <td>
+                            {% if req.status == 'Pending' %}
+                                <span class="badge" style="background:#F39C12;">Chờ duyệt</span>
+                            {% elif req.status == 'Approved' %}
+                                <span class="badge" style="background:#27AE60;">
+                                    {% if req.is_overdue %}<i class="bi bi-exclamation-triangle me-1"></i>Quá hạn
+                                    {% else %}Đã duyệt{% endif %}
+                                </span>
+                            {% elif req.status == 'Rejected' %}
+                                <span class="badge bg-secondary">Từ chối</span>
+                            {% else %}
+                                <span class="badge" style="background:#3498DB;">Đã trả</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-4 small">
+                            Chưa có yêu cầu mượn nào.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
