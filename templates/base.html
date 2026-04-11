@@ -48,6 +48,15 @@
                     <i class="bi bi-clock-history me-2"></i>Lịch sử mượn
                 </a>
             </li>
+            <li class="nav-item">
+                <a href="{{ url_for('user.cart') }}"
+                   class="nav-link sidebar-link {% if request.endpoint == 'user.cart' %}active{% endif %} d-flex align-items-center justify-content-between">
+                    <span><i class="bi bi-basket me-2"></i>Giỏ mượn đồ</span>
+                    {% if cart_count > 0 %}
+                    <span class="badge rounded-pill" style="background:#E74C3C;">{{ cart_count }}</span>
+                    {% endif %}
+                </a>
+            </li>
             {% endif %}
 
             {# ── Menu Admin ── #}
@@ -124,6 +133,15 @@
             <span class="navbar-text fw-semibold" style="color: #2C3E50;">
                 {% block page_title %}{% endblock %}
             </span>
+            {% if current_user.is_authenticated and current_user.role == 'student' %}
+            <a href="{{ url_for('user.cart') }}" class="ms-auto btn btn-sm btn-outline-secondary position-relative me-1" title="Giỏ mượn đồ">
+                <i class="bi bi-basket fs-5"></i>
+                {% if cart_count > 0 %}
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill"
+                      style="background:#E74C3C; font-size:0.65rem;">{{ cart_count }}</span>
+                {% endif %}
+            </a>
+            {% endif %}
         </nav>
 
         <!-- Flash Messages -->

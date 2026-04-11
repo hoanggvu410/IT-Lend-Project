@@ -1,0 +1,365 @@
+{% extends 'base.html' %}
+{% block title %}Giỏ mượn đồ{% endblock %}
+{% block page_title %}Giỏ mượn đồ{% endblock %}
+
+{% block content %}
+
+{% if not cart_items %}
+<!-- ── Giỏ trống ── -->
+<div class="text-center py-5">
+    <i class="bi bi-basket d-block mb-3 opacity-25" style="font-size:4rem; color:#3498DB;"></i>
+    <h5 class="fw-bold mb-2" style="color:#2C3E50;">Giỏ mượn đồ trống</h5>
+    <p class="text-muted mb-4">Hãy thêm thiết bị từ trang chủ vào giỏ trước khi đặt lịch.</p>
+    <a href="{{ url_for('user.index') }}" class="btn text-white px-4" style="background:#3498DB;">
+        <i class="bi bi-arrow-left me-2"></i>Về trang chủ chọn thiết bị
+    </a>
+</div>
+
+{% else %}
+
+{# ─────────────────────────────────────────────────────────────────────
+   QUAN TRỌNG: Chỉ có MỘT form duy nhất — không được lồng form trong form
+   Các nút "Xóa" dùng JS để submit các hidden-form bên dưới
+───────────────────────────────────────────────────────────────────── #}
+
+<!-- ── Main Checkout Form ── -->
+<form method="POST" action="{{ url_for('user.cart_checkout') }}" id="checkoutForm">
+
+    <!-- ── Đồng bộ thời gian ── -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white py-3 d-flex align-items-center gap-2">
+            <i class="bi bi-clock-history fs-5" style="color:#3498DB;"></i>
+            <h6 class="mb-0 fw-bold" style="color:#2C3E50;">Đồng bộ thời gian cho tất cả</h6>
+            <span class="badge bg-secondary ms-1">Tùy chọn</span>
+        </div>
+        <div class="card-body">
+            <p class="text-muted small mb-3">
+                <i class="bi bi-info-circle me-1"></i>
+                Đặt cùng một khung giờ cho tất cả thiết bị. Bạn vẫn có thể chỉnh từng máy riêng bên dưới.
+                <strong>Tối thiểu 1 tiếng – tối đa 3 ngày.</strong>
+            </p>
+            <div class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label small fw-semibold">Giờ bắt đầu (tất cả)</label>
+                    <input type="datetime-local" class="form-control" id="globalBorrow"
+                           min="{{ now.strftime('%Y-%m-%dT%H:%M') }}">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label small fw-semibold">Giờ trả (tất cả)</label>
+                    <input type="datetime-local" class="form-control" id="globalReturn"
+                           min="{{ now.strftime('%Y-%m-%dT%H:%M') }}">
+                </div>
+                <div class="col-md-4">
+                    <button type="button" class="btn w-100 text-white fw-semibold"
+                            style="background:#9B59B6;" id="syncAllBtn">
+                        <i class="bi bi-arrow-repeat me-2"></i>Áp dụng cho tất cả
+                    </button>
+                </div>
+            </div>
+            <div id="globalDurationPreview" class="mt-2 small d-none">
+                <i class="bi bi-stopwatch me-1"></i>
+                Thời gian: <strong id="globalDurationText"></strong>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Danh sách thiết bị trong giỏ ── -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+            <h6 class="mb-0 fw-bold" style="color:#2C3E50;">
+                <i class="bi bi-basket me-2"></i>
+                Thiết bị trong giỏ
+                <span class="badge ms-1" style="background:#3498DB;">{{ cart_items|length }}</span>
+            </h6>
+            <!-- Dùng type="button" + JS — KHÔNG phải nested form -->
+            <button type="button" class="btn btn-sm btn-outline-danger"
+                    onclick="submitClearCart()">
+                <i class="bi bi-trash me-1"></i>Xóa tất cả
+            </button>
+        </div>
+
+        <div class="card-body p-0">
+            {% for eq in cart_items %}
+            <div class="border-bottom p-3" id="cart-item-{{ eq.id }}">
+                <div class="row g-3 align-items-start">
+
+                    <!-- Info -->
+                    <div class="col-md-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="rounded bg-light d-flex align-items-center justify-content-center flex-shrink-0"
+                                 style="width:48px; height:48px;">
+                                {% if 'Laptop' in eq.category.name %}
+                                    <i class="bi bi-laptop text-muted"></i>
+                                {% elif 'chiếu' in eq.category.name %}
+                                    <i class="bi bi-projector text-muted"></i>
+                                {% elif 'IoT' in eq.category.name or 'Kit' in eq.category.name %}
+                                    <i class="bi bi-cpu text-muted"></i>
+                                {% else %}
+                                    <i class="bi bi-device-hdd text-muted"></i>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <div class="fw-semibold small" style="color:#2C3E50; line-height:1.3;">
+                                    {{ eq.name }}
+                                </div>
+                                <div class="text-muted small font-monospace">{{ eq.serial_number }}</div>
+                                <div class="text-muted" style="font-size:.75rem;">
+                                    <i class="bi bi-tag me-1"></i>{{ eq.category.name }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Time pickers — name="" là dữ liệu sẽ được submit bởi checkoutForm -->
+                    <div class="col-md-8">
+                        <div class="row g-2">
+                            <div class="col-sm-6">
+                                <label class="form-label small fw-semibold mb-1">
+                                    Giờ bắt đầu <span class="text-danger">*</span>
+                                </label>
+                                <input type="datetime-local"
+                                       class="form-control form-control-sm borrow-input"
+                                       name="borrow_{{ eq.id }}"
+                                       id="borrow_{{ eq.id }}"
+                                       min="{{ now.strftime('%Y-%m-%dT%H:%M') }}"
+                                       data-eq-id="{{ eq.id }}" required>
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-label small fw-semibold mb-1">
+                                    Giờ trả dự kiến <span class="text-danger">*</span>
+                                </label>
+                                <input type="datetime-local"
+                                       class="form-control form-control-sm return-input"
+                                       name="return_{{ eq.id }}"
+                                       id="return_{{ eq.id }}"
+                                       min="{{ now.strftime('%Y-%m-%dT%H:%M') }}"
+                                       data-eq-id="{{ eq.id }}" required>
+                            </div>
+                            <div class="col-12">
+                                <div class="item-duration-preview small d-none" id="dur-{{ eq.id }}">
+                                    <i class="bi bi-stopwatch me-1"></i>
+                                    Thời gian: <strong class="dur-text"></strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Nút xóa — dùng type="button" + JS, KHÔNG phải nested form -->
+                    <div class="col-md-1 text-end">
+                        <button type="button"
+                                class="btn btn-sm btn-outline-danger"
+                                title="Xóa khỏi giỏ"
+                                onclick="submitRemoveItem({{ eq.id }})">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- ── Submit ── -->
+    <div class="d-flex justify-content-between align-items-center gap-3 flex-wrap">
+        <a href="{{ url_for('user.index') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-plus-circle me-2"></i>Thêm thiết bị khác
+        </a>
+        <div class="d-flex gap-2">
+            <a href="{{ url_for('user.my_requests') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-clock-history me-1"></i>Lịch sử mượn
+            </a>
+            <button type="submit" class="btn text-white fw-semibold px-4"
+                    style="background:#27AE60;" id="checkoutBtn">
+                <i class="bi bi-send me-2"></i>Gửi {{ cart_items|length }} yêu cầu mượn
+            </button>
+        </div>
+    </div>
+
+</form>
+<!-- ── END checkoutForm ─────────────────────────────────────────────── -->
+
+
+{# ──────────────────────────────────────────────────────────────────────
+   Hidden forms cho các thao tác xóa — ĐẶT NGOÀI checkoutForm
+   để tránh nested form (lỗi HTML)
+────────────────────────────────────────────────────────────────────── #}
+
+<!-- Hidden form: xóa toàn bộ giỏ -->
+<form id="clearCartForm" method="POST"
+      action="{{ url_for('user.cart_clear') }}" style="display:none;"></form>
+
+<!-- Hidden forms: xóa từng item -->
+{% for eq in cart_items %}
+<form id="removeForm-{{ eq.id }}" method="POST"
+      action="{{ url_for('user.cart_remove', equipment_id=eq.id) }}"
+      style="display:none;"></form>
+{% endfor %}
+
+{% endif %}
+
+{% endblock %}
+
+
+{% block scripts %}
+<script>
+// ── Xóa toàn bộ giỏ ───────────────────────────────────────────────────
+function submitClearCart() {
+    if (confirm('Bạn có chắc muốn xóa tất cả thiết bị trong giỏ?')) {
+        document.getElementById('clearCartForm').submit();
+    }
+}
+
+// ── Xóa từng item ─────────────────────────────────────────────────────
+function submitRemoveItem(eqId) {
+    const f = document.getElementById('removeForm-' + eqId);
+    if (f) f.submit();
+}
+
+// ── Duration helpers ──────────────────────────────────────────────────
+const MIN_HOURS = 1;
+const MAX_DAYS  = 3;
+
+function formatDuration(ms) {
+    const m  = Math.round(ms / 60000);
+    const d  = Math.floor(m / 1440);
+    const h  = Math.floor((m % 1440) / 60);
+    const mn = m % 60;
+    const parts = [];
+    if (d)  parts.push(d  + ' ngày');
+    if (h)  parts.push(h  + ' tiếng');
+    if (mn) parts.push(mn + ' phút');
+    return parts.join(' ') || '0 phút';
+}
+
+function updateItemDuration(eqId) {
+    const b = document.getElementById(`borrow_${eqId}`);
+    const r = document.getElementById(`return_${eqId}`);
+    const d = document.getElementById(`dur-${eqId}`);
+    if (!b || !r || !d) return;
+    if (!b.value || !r.value) { d.classList.add('d-none'); return; }
+    const ms   = new Date(r.value) - new Date(b.value);
+    const text = d.querySelector('.dur-text');
+    const icon = d.querySelector('i');
+    d.classList.remove('d-none');
+    text.textContent = formatDuration(ms);
+    const ok = ms >= MIN_HOURS * 3600000 && ms <= MAX_DAYS * 86400000;
+    text.style.color = ok ? '#27AE60' : '#E74C3C';
+    icon.className   = ok ? 'bi bi-stopwatch me-1 text-success'
+                          : 'bi bi-exclamation-triangle me-1 text-danger';
+}
+
+// ── Individual item time pickers ──────────────────────────────────────
+document.querySelectorAll('.borrow-input').forEach(inp => {
+    inp.addEventListener('change', function () {
+        const eqId  = this.dataset.eqId;
+        const rInp  = document.getElementById(`return_${eqId}`);
+        const bdt   = new Date(this.value);
+        const minRt = new Date(bdt.getTime() + MIN_HOURS * 3600000).toISOString().slice(0, 16);
+        rInp.min = minRt;
+        if (rInp.value && new Date(rInp.value) <= bdt) rInp.value = minRt;
+        updateItemDuration(eqId);
+    });
+});
+document.querySelectorAll('.return-input').forEach(inp => {
+    inp.addEventListener('change', function () { updateItemDuration(this.dataset.eqId); });
+});
+
+// ── Global sync ───────────────────────────────────────────────────────
+const gBorrow  = document.getElementById('globalBorrow');
+const gReturn  = document.getElementById('globalReturn');
+const gPreview = document.getElementById('globalDurationPreview');
+const gDurText = document.getElementById('globalDurationText');
+
+function updateGlobalDuration() {
+    if (!gBorrow?.value || !gReturn?.value) { gPreview?.classList.add('d-none'); return; }
+    const ms = new Date(gReturn.value) - new Date(gBorrow.value);
+    gPreview.classList.remove('d-none');
+    gDurText.textContent = formatDuration(ms);
+    const ok = ms >= MIN_HOURS * 3600000 && ms <= MAX_DAYS * 86400000;
+    gDurText.style.color = ok ? '#27AE60' : '#E74C3C';
+}
+
+gBorrow?.addEventListener('change', function () {
+    if (gReturn) {
+        const minRt = new Date(new Date(this.value).getTime() + MIN_HOURS * 3600000)
+                          .toISOString().slice(0, 16);
+        gReturn.min = minRt;
+        if (gReturn.value && new Date(gReturn.value) <= new Date(this.value))
+            gReturn.value = minRt;
+    }
+    updateGlobalDuration();
+});
+gReturn?.addEventListener('change', updateGlobalDuration);
+
+document.getElementById('syncAllBtn')?.addEventListener('click', function () {
+    const bv = gBorrow?.value;
+    const rv = gReturn?.value;
+    if (!bv || !rv) {
+        alert('Vui lòng chọn giờ bắt đầu và giờ trả trước khi đồng bộ.');
+        return;
+    }
+    const ms = new Date(rv) - new Date(bv);
+    if (ms < MIN_HOURS * 3600000) { alert('Thời gian tối thiểu là 1 tiếng.'); return; }
+    if (ms > MAX_DAYS * 86400000) { alert('Thời gian tối đa là 3 ngày.'); return; }
+
+    document.querySelectorAll('.borrow-input').forEach(inp => {
+        const eqId = inp.dataset.eqId;
+        inp.value = bv;
+        const rInp = document.getElementById(`return_${eqId}`);
+        if (rInp) {
+            rInp.min   = new Date(new Date(bv).getTime() + MIN_HOURS * 3600000)
+                             .toISOString().slice(0, 16);
+            rInp.value = rv;
+        }
+        updateItemDuration(eqId);
+    });
+
+    this.innerHTML = '<i class="bi bi-check2-all me-2"></i>Đã đồng bộ!';
+    this.style.background = '#27AE60';
+    setTimeout(() => {
+        this.innerHTML = '<i class="bi bi-arrow-repeat me-2"></i>Áp dụng cho tất cả';
+        this.style.background = '#9B59B6';
+    }, 2000);
+});
+
+// ── Client-side validation trước khi submit checkoutForm ─────────────
+document.getElementById('checkoutForm')?.addEventListener('submit', function (e) {
+    const now = new Date();
+    let hasError = false;
+
+    document.querySelectorAll('.borrow-input').forEach(bInp => {
+        if (hasError) return;
+        const eqId = bInp.dataset.eqId;
+        const rInp = document.getElementById(`return_${eqId}`);
+
+        if (!bInp.value || !rInp?.value) {
+            hasError = true;
+            alert('Vui lòng chọn đầy đủ thời gian mượn và trả cho tất cả thiết bị.');
+            bInp.focus();
+            return;
+        }
+
+        const bdt = new Date(bInp.value);
+        const rdt = new Date(rInp.value);
+        const ms  = rdt - bdt;
+
+        if (bdt < now) {
+            hasError = true;
+            alert(`Thời gian bắt đầu phải trong tương lai.`);
+            bInp.focus();
+        } else if (ms < MIN_HOURS * 3600000) {
+            hasError = true;
+            alert(`Thời gian mượn tối thiểu là 1 tiếng.`);
+            bInp.focus();
+        } else if (ms > MAX_DAYS * 86400000) {
+            hasError = true;
+            alert(`Thời gian mượn tối đa là 3 ngày.`);
+            bInp.focus();
+        }
+    });
+
+    if (hasError) e.preventDefault();
+});
+</script>
+{% endblock %}

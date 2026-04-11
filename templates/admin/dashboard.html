@@ -5,61 +5,62 @@
 {% block content %}
 
 <!-- ── Stat Cards ── -->
-<div class="row g-4 mb-4">
-    <div class="col-sm-6 col-xl-3">
-        <div class="card border-0 shadow-sm stat-card">
-            <div class="card-body d-flex align-items-center gap-3" style="border-left:4px solid #3498DB;">
-                <div class="flex-grow-1">
-                    <div class="text-muted small fw-semibold text-uppercase mb-1">Tổng thiết bị</div>
-                    <div class="fs-2 fw-bold" style="color:#2C3E50;">{{ total_equipment }}</div>
-                </div>
-                <i class="bi bi-laptop opacity-25" style="font-size:3rem; color:#3498DB;"></i>
+<div class="row g-3 mb-4">
+    <div class="col-6 col-xl">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body p-3" style="border-left:4px solid #3498DB;">
+                <div class="text-muted fw-semibold text-uppercase mb-1" style="font-size:.65rem;">Tổng thiết bị</div>
+                <div class="fs-3 fw-bold" style="color:#2C3E50;">{{ total_equipment }}</div>
+                <i class="bi bi-laptop" style="color:#3498DB; opacity:.25; font-size:1.8rem; float:right; margin-top:-2.6rem;"></i>
             </div>
         </div>
     </div>
-    <div class="col-sm-6 col-xl-3">
-        <div class="card border-0 shadow-sm stat-card">
-            <div class="card-body d-flex align-items-center gap-3" style="border-left:4px solid #27AE60;">
-                <div class="flex-grow-1">
-                    <div class="text-muted small fw-semibold text-uppercase mb-1">Sẵn sàng</div>
-                    <div class="fs-2 fw-bold" style="color:#27AE60;">{{ available_count }}</div>
-                </div>
-                <i class="bi bi-check-circle opacity-25" style="font-size:3rem; color:#27AE60;"></i>
+    <div class="col-6 col-xl">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body p-3" style="border-left:4px solid #27AE60;">
+                <div class="text-muted fw-semibold text-uppercase mb-1" style="font-size:.65rem;">Có thể mượn</div>
+                <div class="fs-3 fw-bold" style="color:#27AE60;">{{ available_count }}</div>
+                <i class="bi bi-check-circle" style="color:#27AE60; opacity:.25; font-size:1.8rem; float:right; margin-top:-2.6rem;"></i>
             </div>
         </div>
     </div>
-    <div class="col-sm-6 col-xl-3">
-        <div class="card border-0 shadow-sm stat-card">
-            <div class="card-body d-flex align-items-center gap-3" style="border-left:4px solid #E74C3C;">
-                <div class="flex-grow-1">
-                    <div class="text-muted small fw-semibold text-uppercase mb-1">Đang cho mượn</div>
-                    <div class="fs-2 fw-bold" style="color:#E74C3C;">{{ borrowed_count }}</div>
-                </div>
-                <i class="bi bi-arrow-up-right-circle opacity-25" style="font-size:3rem; color:#E74C3C;"></i>
+    <div class="col-6 col-xl">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body p-3" style="border-left:4px solid #E74C3C;">
+                <div class="text-muted fw-semibold text-uppercase mb-1" style="font-size:.65rem;">Đang cho mượn</div>
+                <div class="fs-3 fw-bold" style="color:#E74C3C;">{{ borrowed_count }}</div>
+                <i class="bi bi-arrow-up-right-circle" style="color:#E74C3C; opacity:.25; font-size:1.8rem; float:right; margin-top:-2.6rem;"></i>
             </div>
         </div>
     </div>
-    <div class="col-sm-6 col-xl-3">
-        <div class="card border-0 shadow-sm stat-card">
-            <div class="card-body d-flex align-items-center gap-3" style="border-left:4px solid #F39C12;">
-                <div class="flex-grow-1">
-                    <div class="text-muted small fw-semibold text-uppercase mb-1">Chờ duyệt</div>
-                    <div class="fs-2 fw-bold" style="color:#F39C12;">{{ pending_requests }}</div>
-                </div>
-                <i class="bi bi-hourglass-split opacity-25" style="font-size:3rem; color:#F39C12;"></i>
+    <div class="col-6 col-xl">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body p-3" style="border-left:4px solid #8E44AD;">
+                <div class="text-muted fw-semibold text-uppercase mb-1" style="font-size:.65rem;">Đang bảo trì</div>
+                <div class="fs-3 fw-bold" style="color:#8E44AD;">{{ maintenance_count }}</div>
+                <i class="bi bi-tools" style="color:#8E44AD; opacity:.25; font-size:1.8rem; float:right; margin-top:-2.6rem;"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-xl">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body p-3" style="border-left:4px solid #F39C12;">
+                <div class="text-muted fw-semibold text-uppercase mb-1" style="font-size:.65rem;">Chờ duyệt</div>
+                <div class="fs-3 fw-bold" style="color:#F39C12;">{{ pending_requests }}</div>
+                <i class="bi bi-hourglass-split" style="color:#F39C12; opacity:.25; font-size:1.8rem; float:right; margin-top:-2.6rem;"></i>
             </div>
         </div>
     </div>
 </div>
 
 <!-- ── Quick Actions ── -->
-<div class="row g-4 mb-4">
+<div class="row g-3 mb-4">
     <div class="col-md-4">
         <a href="{{ url_for('admin.approve_requests') }}"
            class="card border-0 shadow-sm text-decoration-none quick-action-card">
-            <div class="card-body text-center py-4">
-                <i class="bi bi-check2-square mb-2" style="font-size:2rem; color:#3498DB;"></i>
-                <div class="fw-semibold" style="color:#2C3E50;">Duyệt yêu cầu</div>
+            <div class="card-body text-center py-3">
+                <i class="bi bi-check2-square mb-1" style="font-size:1.8rem; color:#3498DB;"></i>
+                <div class="fw-semibold small" style="color:#2C3E50;">Duyệt yêu cầu</div>
                 {% if pending_requests > 0 %}
                 <span class="badge mt-1" style="background:#E74C3C;">{{ pending_requests }} chờ duyệt</span>
                 {% else %}
@@ -71,9 +72,9 @@
     <div class="col-md-4">
         <a href="{{ url_for('admin.equipments') }}"
            class="card border-0 shadow-sm text-decoration-none quick-action-card">
-            <div class="card-body text-center py-4">
-                <i class="bi bi-plus-circle mb-2" style="font-size:2rem; color:#27AE60;"></i>
-                <div class="fw-semibold" style="color:#2C3E50;">Thêm thiết bị</div>
+            <div class="card-body text-center py-3">
+                <i class="bi bi-plus-circle mb-1" style="font-size:1.8rem; color:#27AE60;"></i>
+                <div class="fw-semibold small" style="color:#2C3E50;">Quản lý thiết bị</div>
                 <span class="badge mt-1 bg-secondary">{{ total_equipment }} thiết bị</span>
             </div>
         </a>
@@ -81,14 +82,71 @@
     <div class="col-md-4">
         <a href="{{ url_for('admin.categories') }}"
            class="card border-0 shadow-sm text-decoration-none quick-action-card">
-            <div class="card-body text-center py-4">
-                <i class="bi bi-tags mb-2" style="font-size:2rem; color:#9B59B6;"></i>
-                <div class="fw-semibold" style="color:#2C3E50;">Quản lý danh mục</div>
-                <span class="badge mt-1 bg-secondary">{{ total_users }} sinh viên</span>
+            <div class="card-body text-center py-3">
+                <i class="bi bi-tags mb-1" style="font-size:1.8rem; color:#9B59B6;"></i>
+                <div class="fw-semibold small" style="color:#2C3E50;">Quản lý danh mục</div>
+                <span class="badge mt-1 bg-secondary">{{ category_stats|length }} loại</span>
             </div>
         </a>
     </div>
 </div>
+
+<!-- ── Thống kê theo Loại thiết bị ── -->
+{% if category_stats %}
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white py-3">
+        <h6 class="mb-0 fw-bold" style="color:#2C3E50;">
+            <i class="bi bi-bar-chart-line me-2" style="color:#3498DB;"></i>Thống kê theo loại thiết bị
+        </h6>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead style="background:#f8f9fa;">
+                    <tr>
+                        <th class="py-2 px-4 small text-muted">Loại thiết bị</th>
+                        <th class="py-2 small text-muted text-center">Tổng</th>
+                        <th class="py-2 small text-muted text-center" style="color:#27AE60;">Có thể mượn</th>
+                        <th class="py-2 small text-muted text-center" style="color:#E74C3C;">Đang mượn</th>
+                        <th class="py-2 small text-muted text-center" style="color:#8E44AD;">Bảo trì</th>
+                        <th class="py-2 small text-muted text-center" style="color:#F39C12;">Chờ duyệt</th>
+                        <th class="py-2 small text-muted" style="width:150px;">Tỷ lệ sẵn sàng</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for stat in category_stats %}
+                    <tr>
+                        <td class="px-4 fw-semibold" style="color:#2C3E50;">
+                            <i class="bi bi-tag me-1 text-muted"></i>{{ stat.name }}
+                        </td>
+                        <td class="text-center fw-bold">{{ stat.total }}</td>
+                        <td class="text-center fw-bold" style="color:#27AE60;">{{ stat.available }}</td>
+                        <td class="text-center fw-bold" style="color:#E74C3C;">{{ stat.borrowed }}</td>
+                        <td class="text-center fw-bold" style="color:#8E44AD;">{{ stat.maintenance }}</td>
+                        <td class="text-center">
+                            {% if stat.pending > 0 %}
+                            <span class="badge" style="background:#F39C12;">{{ stat.pending }}</span>
+                            {% else %}<span class="text-muted small">0</span>{% endif %}
+                        </td>
+                        <td>
+                            {% set pct = ((stat.available / stat.total) * 100)|int if stat.total > 0 else 0 %}
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="progress flex-grow-1" style="height:7px;">
+                                    <div class="progress-bar"
+                                         style="width:{{ pct }}%; background:{% if pct >= 70 %}#27AE60{% elif pct >= 30 %}#F39C12{% else %}#E74C3C{% endif %};"
+                                         role="progressbar"></div>
+                                </div>
+                                <span class="small text-muted" style="min-width:32px;">{{ pct }}%</span>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endif %}
 
 <!-- ── Bảng Yêu cầu gần đây ── -->
 <div class="card border-0 shadow-sm">
@@ -116,11 +174,9 @@
                     {% for req in recent_requests %}
                     <tr>
                         <td class="px-4 text-muted small">{{ req.id }}</td>
-                        <td>
-                            <div class="fw-semibold small" style="color:#2C3E50;">{{ req.user.username }}</div>
-                        </td>
+                        <td><div class="fw-semibold small" style="color:#2C3E50;">{{ req.user.username }}</div></td>
                         <td class="small">{{ req.equipment.name }}</td>
-                        <td class="small text-muted">{{ req.borrow_date.strftime('%d/%m/%Y') }}</td>
+                        <td class="small text-muted">{{ req.borrow_date.strftime('%d/%m/%Y %H:%M') }}</td>
                         <td>
                             {% if req.status == 'Pending' %}
                                 <span class="badge" style="background:#F39C12;">Chờ duyệt</span>
@@ -138,9 +194,7 @@
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="5" class="text-center text-muted py-4 small">
-                            Chưa có yêu cầu mượn nào.
-                        </td>
+                        <td colspan="5" class="text-center text-muted py-4 small">Chưa có yêu cầu mượn nào.</td>
                     </tr>
                     {% endfor %}
                 </tbody>

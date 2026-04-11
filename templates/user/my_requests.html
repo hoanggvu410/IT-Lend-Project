@@ -40,9 +40,9 @@
                                 {{ req.equipment.serial_number }}
                             </div>
                         </td>
-                        <td>{{ req.borrow_date.strftime('%d/%m/%Y') }}</td>
+                        <td>{{ req.borrow_date.strftime('%d/%m/%Y %H:%M') }}</td>
                         <td>
-                            {{ req.return_date.strftime('%d/%m/%Y') }}
+                            {{ req.return_date.strftime('%d/%m/%Y %H:%M') }}
                             {% if req.is_overdue %}
                             <span class="badge ms-1" style="background:#E74C3C;">
                                 <i class="bi bi-exclamation-triangle me-1"></i>Quá hạn!
@@ -51,7 +51,7 @@
                             {% if req.actual_return_date %}
                             <div class="text-muted small">
                                 <i class="bi bi-check me-1"></i>
-                                Đã trả: {{ req.actual_return_date.strftime('%d/%m/%Y') }}
+                                Đã trả: {{ req.actual_return_date.strftime('%d/%m/%Y %H:%M') }}
                             </div>
                             {% endif %}
                         </td>

@@ -3,8 +3,8 @@ app.py — Flask Application Factory (Entry Point)
 Chạy:  python app.py
 """
 import os
-from flask import Flask
-from extensions import db, bcrypt, login_manager
+from flask import Flask, session
+from extensions import db, bcrypt, login_manager, migrate
 
 
 def create_app():
@@ -19,20 +19,24 @@ def create_app():
     db.init_app(app)
     bcrypt.init_app(app)
     login_manager.init_app(app)
+    migrate.init_app(app, db)
 
     # ── Đăng ký Blueprints ────────────────────────────────────────────────
     from auth import auth_bp
     from admin import admin_bp
     from user import user_bp
 
-    app.register_blueprint(auth_bp)                    # /login, /register, /logout, /search
-    app.register_blueprint(admin_bp, url_prefix='/admin')  # /admin/*, /admin/equipments, ...
-    app.register_blueprint(user_bp)                    # /, /equipment/<id>, /my-requests
+    app.register_blueprint(auth_bp)                        # /login, /register, /logout
+    app.register_blueprint(admin_bp, url_prefix='/admin')  # /admin/*
+    app.register_blueprint(user_bp)                        # /, /equipment/<id>, /my-requests
 
-    # ── Tạo bảng DB nếu chưa có ──────────────────────────────────────────
-    with app.app_context():
-        import models  # noqa: F401 — đảm bảo models được nạp trước db.create_all()
-        db.create_all()
+    # ── Context processor: inject cart_count vào mọi template ────────────
+    @app.context_processor
+    def inject_cart():
+        from flask_login import current_user
+        if current_user.is_authenticated and current_user.role == 'student':
+            return {'cart_count': len(session.get('cart', []))}
+        return {'cart_count': 0}
 
     return app
 
@@ -40,4 +44,3 @@ def create_app():
 if __name__ == '__main__':
     app = create_app()
     app.run(debug=True)
-

@@ -7,30 +7,23 @@
 <!-- ── Search & Filter ── -->
 <div class="card border-0 shadow-sm mb-4">
     <div class="card-body py-3">
-        <form method="GET" action="{{ url_for('user.index') }}" class="row g-2 align-items-center"
-              id="searchForm">
+        <form method="GET" action="{{ url_for('user.index') }}" class="row g-2 align-items-center" id="searchForm">
             <div class="col-md-6 position-relative">
                 <div class="input-group">
                     <span class="input-group-text"><i class="bi bi-search"></i></span>
                     <input type="text" class="form-control" name="q" id="searchInput"
                            placeholder="Tìm kiếm theo tên thiết bị..."
-                           value="{{ query | default('') }}"
-                           autocomplete="off">
+                           value="{{ query | default('') }}" autocomplete="off">
                 </div>
-                <!-- Dropdown gợi ý -->
                 <div id="searchSuggestions"
                      class="list-group position-absolute d-none shadow-sm"
-                     style="top:100%; left:0; right:0; z-index:1050;
-                            max-height:280px; overflow-y:auto; border-radius:0 0 8px 8px;">
-                </div>
+                     style="top:100%; left:0; right:0; z-index:1050; max-height:280px; overflow-y:auto; border-radius:0 0 8px 8px;"></div>
             </div>
             <div class="col-md-4">
                 <select class="form-select" name="category">
                     <option value="">-- Tất cả danh mục --</option>
                     {% for cat in categories %}
-                    <option value="{{ cat.id }}" {{ 'selected' if selected_category == cat.id else '' }}>
-                        {{ cat.name }}
-                    </option>
+                    <option value="{{ cat.id }}" {{ 'selected' if selected_category == cat.id else '' }}>{{ cat.name }}</option>
                     {% endfor %}
                 </select>
             </div>
@@ -43,82 +36,144 @@
     </div>
 </div>
 
-<!-- ── Equipment Cards ── -->
-<div class="row g-4">
-    {% for eq in equipments %}
-    <div class="col-sm-6 col-lg-4 col-xl-3">
-        <div class="card border-0 shadow-sm h-100 equipment-card">
+<!-- ── Toast thêm vào giỏ ── -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index:9999;">
+    <div id="cartToast" class="toast align-items-center border-0 text-white"
+         style="background:#27AE60;" role="alert" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body fw-semibold" id="cartToastMsg">
+                <i class="bi bi-basket me-2"></i>Đã thêm vào giỏ!
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+</div>
 
-            <!-- Equipment Image — click vào ảnh để xem chi tiết -->
-            <a href="{{ url_for('user.equipment_detail', equipment_id=eq.id) }}"
-               class="text-decoration-none">
-                {% if eq.image_url %}
-                <img src="{{ eq.image_url }}" class="card-img-top"
-                     alt="{{ eq.name }}" style="height:180px; object-fit:cover;">
+<!-- ── Equipment Groups ── -->
+<div class="row g-4">
+    {% for g in groups %}
+    {% set gid = loop.index0 %}
+    <div class="col-sm-6 col-lg-4 col-xl-3">
+        <div class="card border-0 shadow-sm h-100 equipment-card" style="cursor:pointer;"
+             data-bs-toggle="offcanvas" data-bs-target="#oc-{{ gid }}">
+
+            <!-- Image / Icon -->
+            {% if g.image_url %}
+            <img src="{{ g.image_url }}" class="card-img-top"
+                 alt="{{ g.name }}" style="height:180px; object-fit:cover;">
+            {% else %}
+            <div class="d-flex align-items-center justify-content-center bg-light"
+                 style="height:180px; border-radius:12px 12px 0 0; position:relative;">
+                {% if 'Laptop' in g.category.name %}
+                    <i class="bi bi-laptop text-muted" style="font-size:4rem;"></i>
+                {% elif 'chiếu' in g.category.name %}
+                    <i class="bi bi-projector text-muted" style="font-size:4rem;"></i>
+                {% elif 'IoT' in g.category.name or 'Kit' in g.category.name %}
+                    <i class="bi bi-cpu text-muted" style="font-size:4rem;"></i>
                 {% else %}
-                <div class="d-flex align-items-center justify-content-center bg-light"
-                     style="height:180px; border-radius:12px 12px 0 0;">
-                    {% if 'Laptop' in eq.category.name %}
-                        <i class="bi bi-laptop text-muted" style="font-size:4rem;"></i>
-                    {% elif 'chiếu' in eq.category.name %}
-                        <i class="bi bi-projector text-muted" style="font-size:4rem;"></i>
-                    {% elif 'IoT' in eq.category.name or 'Kit' in eq.category.name %}
-                        <i class="bi bi-cpu text-muted" style="font-size:4rem;"></i>
-                    {% else %}
-                        <i class="bi bi-device-hdd text-muted" style="font-size:4rem;"></i>
-                    {% endif %}
-                </div>
+                    <i class="bi bi-device-hdd text-muted" style="font-size:4rem;"></i>
                 {% endif %}
-            </a>
+            </div>
+            {% endif %}
 
             <div class="card-body d-flex flex-column">
-                <!-- Tên thiết bị — click để xem chi tiết -->
-                <a href="{{ url_for('user.equipment_detail', equipment_id=eq.id) }}"
-                   class="text-decoration-none">
-                    <h6 class="card-title fw-bold mb-1 text-truncate" style="color:#2C3E50;"
-                        title="{{ eq.name }}">{{ eq.name }}</h6>
-                </a>
-                <p class="text-muted small mb-1">
-                    <i class="bi bi-tag me-1"></i>{{ eq.category.name }}
-                </p>
-                <p class="text-muted small mb-3 font-monospace">
-                    <i class="bi bi-upc me-1"></i>{{ eq.serial_number }}
+                <h6 class="card-title fw-bold mb-1 text-truncate" style="color:#2C3E50;" title="{{ g.name }}">
+                    {{ g.name }}
+                </h6>
+                <p class="text-muted small mb-2">
+                    <i class="bi bi-tag me-1"></i>{{ g.category.name }}
                 </p>
 
-                <div class="mt-auto">
-                    {% if eq.status == 'Available' %}
-                        <span class="badge mb-2 d-block text-start"
-                              style="background:#27AE60; width:fit-content;">
-                            <i class="bi bi-check-circle me-1"></i>Sẵn sàng
-                        </span>
-                        <a href="{{ url_for('user.equipment_detail', equipment_id=eq.id) }}"
-                           class="btn btn-sm w-100 text-white fw-semibold"
-                           style="background:#3498DB;">
-                            <i class="bi bi-calendar-plus me-1"></i>Đăng ký mượn
-                        </a>
-
-                    {% elif eq.status == 'Borrowed' %}
-                        <span class="badge mb-2 d-block text-start"
-                              style="background:#E74C3C; width:fit-content;">
-                            <i class="bi bi-arrow-up-right-circle me-1"></i>Đang được mượn
-                        </span>
-                        <a href="{{ url_for('user.equipment_detail', equipment_id=eq.id) }}"
-                           class="btn btn-sm w-100 btn-outline-secondary">
-                            <i class="bi bi-eye me-1"></i>Xem chi tiết
-                        </a>
-
-                    {% else %}
-                        <span class="badge mb-2 d-block text-start bg-warning text-dark"
-                              style="width:fit-content;">
-                            <i class="bi bi-tools me-1"></i>Đang bảo trì
-                        </span>
-                        <a href="{{ url_for('user.equipment_detail', equipment_id=eq.id) }}"
-                           class="btn btn-sm w-100 btn-outline-secondary">
-                            <i class="bi bi-eye me-1"></i>Xem chi tiết
-                        </a>
+                <div class="mt-auto d-flex flex-wrap gap-1 align-items-center">
+                    <!-- Số lượng máy -->
+                    <span class="badge" style="background:#3498DB;">
+                        <i class="bi bi-layers me-1"></i>{{ g.total }} máy
+                    </span>
+                    <!-- Chỉ hiện badge bảo trì nếu có -->
+                    {% if g.maintenance_count == g.total %}
+                    <span class="badge bg-warning text-dark">
+                        <i class="bi bi-tools me-1"></i>Toàn bộ bảo trì
+                    </span>
+                    {% elif g.maintenance_count > 0 %}
+                    <span class="badge bg-warning text-dark">
+                        <i class="bi bi-tools me-1"></i>{{ g.maintenance_count }} bảo trì
+                    </span>
                     {% endif %}
                 </div>
+
+                <button class="btn btn-sm w-100 text-white fw-semibold mt-3"
+                        style="background:#3498DB;"
+                        data-bs-toggle="offcanvas" data-bs-target="#oc-{{ gid }}"
+                        onclick="event.stopPropagation()">
+                    <i class="bi bi-grid me-1"></i>Chọn máy ({{ g.total }})
+                </button>
             </div>
+        </div>
+    </div>
+
+    <!-- ── Offcanvas chọn máy cụ thể ── -->
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="oc-{{ gid }}"
+         style="width:420px;" data-bs-scroll="true">
+        <div class="offcanvas-header" style="background:#2C3E50;">
+            <div>
+                <h5 class="offcanvas-title text-white fw-bold mb-0">{{ g.name }}</h5>
+                <small class="text-white opacity-75">
+                    <i class="bi bi-tag me-1"></i>{{ g.category.name }} &bull; {{ g.total }} máy
+                </small>
+            </div>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+        </div>
+        <div class="offcanvas-body p-3">
+            <p class="text-muted small mb-3">
+                <i class="bi bi-info-circle me-1"></i>
+                Chọn một máy bên dưới để <strong>thêm vào giỏ mượn</strong>
+                hoặc <strong>xem chi tiết</strong>. Khung giờ sẽ được chọn ở trang Giỏ mượn.
+            </p>
+
+            {% for eq in g.units %}
+            <div class="card border mb-2 unit-card" id="unit-card-{{ eq.id }}">
+                <div class="card-body py-2 px-3">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <span class="font-monospace small fw-bold text-primary">{{ eq.serial_number }}</span>
+                        {% if eq.status == 'Maintenance' %}
+                        <span class="badge bg-warning text-dark ms-auto">
+                            <i class="bi bi-tools me-1"></i>Bảo trì
+                        </span>
+                        {% else %}
+                            {% if eq.id in cart_ids %}
+                            <span class="badge ms-auto" style="background:#27AE60;">
+                                <i class="bi bi-basket me-1"></i>Đã trong giỏ
+                            </span>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <a href="{{ url_for('user.equipment_detail', equipment_id=eq.id) }}"
+                           class="btn btn-sm btn-outline-secondary flex-grow-1">
+                            <i class="bi bi-eye me-1"></i>Chi tiết
+                        </a>
+                        {% if eq.status != 'Maintenance' %}
+                        {% if eq.id in cart_ids %}
+                        <a href="{{ url_for('user.cart') }}"
+                           class="btn btn-sm text-white flex-grow-1"
+                           style="background:#27AE60;">
+                            <i class="bi bi-basket me-1"></i>Xem giỏ
+                        </a>
+                        {% else %}
+                        <button class="btn btn-sm text-white flex-grow-1 btn-add-cart"
+                                style="background:#3498DB;"
+                                data-eq-id="{{ eq.id }}"
+                                data-eq-name="{{ eq.name }}"
+                                data-eq-serial="{{ eq.serial_number }}">
+                            <i class="bi bi-plus-circle me-1"></i>Thêm vào giỏ
+                        </button>
+                        {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
         </div>
     </div>
     {% else %}
@@ -126,9 +181,7 @@
         <div class="text-center py-5 text-muted">
             <i class="bi bi-search d-block mb-3 opacity-25" style="font-size:3rem;"></i>
             <p class="mb-2">Không tìm thấy thiết bị nào phù hợp.</p>
-            <a href="{{ url_for('user.index') }}" class="btn btn-sm btn-outline-secondary">
-                Xem tất cả thiết bị
-            </a>
+            <a href="{{ url_for('user.index') }}" class="btn btn-sm btn-outline-secondary">Xem tất cả</a>
         </div>
     </div>
     {% endfor %}
@@ -139,33 +192,28 @@
 <nav class="mt-4 d-flex flex-column align-items-center gap-1">
     <ul class="pagination mb-1">
         <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
-            <a class="page-link"
-               href="{{ url_for('user.index', page=pagination.prev_num, category=selected_category) }}">
+            <a class="page-link" href="{{ url_for('user.index', page=pagination.prev_num, category=selected_category, q=query) }}">
                 <i class="bi bi-chevron-left"></i>
             </a>
         </li>
         {% for p in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
             {% if p %}
                 <li class="page-item {% if p == pagination.page %}active{% endif %}">
-                    <a class="page-link"
-                       href="{{ url_for('user.index', page=p, category=selected_category) }}"
-                       {% if p == pagination.page %}style="background:#3498DB; border-color:#3498DB;"{% endif %}>
-                        {{ p }}
-                    </a>
+                    <a class="page-link" href="{{ url_for('user.index', page=p, category=selected_category, q=query) }}"
+                       {% if p == pagination.page %}style="background:#3498DB; border-color:#3498DB;"{% endif %}>{{ p }}</a>
                 </li>
             {% else %}
                 <li class="page-item disabled"><span class="page-link">…</span></li>
             {% endif %}
         {% endfor %}
         <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
-            <a class="page-link"
-               href="{{ url_for('user.index', page=pagination.next_num, category=selected_category) }}">
+            <a class="page-link" href="{{ url_for('user.index', page=pagination.next_num, category=selected_category, q=query) }}">
                 <i class="bi bi-chevron-right"></i>
             </a>
         </li>
     </ul>
     <p class="text-muted small mb-0">
-        Trang {{ pagination.page }}/{{ pagination.pages }} &mdash; {{ pagination.total }} thiết bị
+        Trang {{ pagination.page }}/{{ pagination.pages }} &mdash; {{ pagination.total }} loại thiết bị
     </p>
 </nav>
 {% endif %}
@@ -174,70 +222,107 @@
 
 {% block scripts %}
 <script>
-const searchInput      = document.getElementById('searchInput');
-const suggestionsBox   = document.getElementById('searchSuggestions');
-const statusLabel      = { 'Available': 'Sẵn sàng', 'Borrowed': 'Đang mượn', 'Maintenance': 'Bảo trì' };
-const statusColor      = { 'Available': '#27AE60',  'Borrowed': '#E74C3C',    'Maintenance': '#f0ad4e' };
-
+// ── Search suggestions ─────────────────────────────────────────────────
+const searchInput    = document.getElementById('searchInput');
+const suggestionsBox = document.getElementById('searchSuggestions');
 let debounceTimer;
 
 searchInput?.addEventListener('input', function () {
     clearTimeout(debounceTimer);
     const q = this.value.trim();
-
-    if (q.length < 1) {
-        suggestionsBox.innerHTML = '';
-        suggestionsBox.classList.add('d-none');
-        return;
-    }
-
+    if (q.length < 1) { suggestionsBox.innerHTML = ''; suggestionsBox.classList.add('d-none'); return; }
     debounceTimer = setTimeout(() => {
         fetch(`/api/suggestions?q=${encodeURIComponent(q)}`)
-            .then(res => res.json())
+            .then(r => r.json())
             .then(data => {
                 suggestionsBox.innerHTML = '';
-
-                if (data.length === 0) {
-                    suggestionsBox.classList.add('d-none');
-                    return;
-                }
-
+                if (!data.length) { suggestionsBox.classList.add('d-none'); return; }
                 data.forEach(eq => {
-                    const item = document.createElement('a');
-                    item.href      = `/equipment/${eq.id}`;
-                    item.className = 'list-group-item list-group-item-action d-flex justify-content-between align-items-center py-2 px-3';
-                    item.innerHTML = `
-                        <div>
-                            <div class="fw-semibold small" style="color:#2C3E50;">${eq.name}</div>
-                            <div class="text-muted" style="font-size:0.75rem;">
-                                <i class="bi bi-tag me-1"></i>${eq.category}
-                            </div>
-                        </div>
-                        <span class="badge ms-2" style="background:${statusColor[eq.status] || '#adb5bd'}; white-space:nowrap;">
-                            ${statusLabel[eq.status] || eq.status}
-                        </span>`;
-                    suggestionsBox.appendChild(item);
+                    const a = document.createElement('a');
+                    a.href = `/equipment/${eq.id}`;
+                    a.className = 'list-group-item list-group-item-action d-flex justify-content-between align-items-center py-2 px-3';
+                    a.innerHTML = `<div><div class="fw-semibold small" style="color:#2C3E50;">${eq.name}</div>
+                        <div class="text-muted" style="font-size:.75rem;"><i class="bi bi-tag me-1"></i>${eq.category}</div></div>
+                        <span class="badge ms-2" style="background:${eq.status==='Maintenance'?'#f0ad4e':'#27AE60'}; white-space:nowrap;">
+                        ${eq.status==='Maintenance'?'Bảo trì':'Sẵn sàng'}</span>`;
+                    suggestionsBox.appendChild(a);
                 });
-
                 suggestionsBox.classList.remove('d-none');
-            })
-            .catch(() => suggestionsBox.classList.add('d-none'));
+            }).catch(() => suggestionsBox.classList.add('d-none'));
     }, 250);
 });
-
-// Ẩn dropdown khi click ra ngoài
-document.addEventListener('click', function (e) {
-    if (!searchInput?.contains(e.target) && !suggestionsBox?.contains(e.target)) {
+document.addEventListener('click', e => {
+    if (!searchInput?.contains(e.target) && !suggestionsBox?.contains(e.target))
         suggestionsBox?.classList.add('d-none');
-    }
 });
 
-// Hiện lại khi focus vào input đang có giá trị
-searchInput?.addEventListener('focus', function () {
-    if (this.value.trim().length > 0 && suggestionsBox.children.length > 0) {
-        suggestionsBox.classList.remove('d-none');
-    }
+// ── Add to Cart ─────────────────────────────────────────────────────────
+const toast    = new bootstrap.Toast(document.getElementById('cartToast'), { delay: 2500 });
+const toastMsg = document.getElementById('cartToastMsg');
+const cartBadges = document.querySelectorAll('.cart-badge-top, .cart-badge-sidebar');
+
+function updateCartBadges(count) {
+    document.querySelectorAll('[data-cart-badge]').forEach(el => {
+        el.textContent = count;
+        el.style.display = count > 0 ? '' : 'none';
+    });
+}
+
+document.addEventListener('click', function(e) {
+    const btn = e.target.closest('.btn-add-cart');
+    if (!btn) return;
+    e.preventDefault();
+    e.stopPropagation();
+
+    const eqId     = parseInt(btn.dataset.eqId);
+    const eqName   = btn.dataset.eqName;
+    const eqSerial = btn.dataset.eqSerial;
+
+    fetch('/cart/add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ equipment_id: eqId })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.error) {
+            toastMsg.innerHTML = `<i class="bi bi-exclamation-triangle me-2"></i>${data.error}`;
+            document.getElementById('cartToast').style.background = '#E74C3C';
+        } else if (data.message === 'already_in_cart') {
+            toastMsg.innerHTML = `<i class="bi bi-basket me-2"></i>"${eqName}" đã có trong giỏ rồi!`;
+            document.getElementById('cartToast').style.background = '#F39C12';
+        } else {
+            // Cập nhật UI: thay nút → "Đã trong giỏ"
+            const card = document.getElementById(`unit-card-${eqId}`);
+            if (card) {
+                const addBtn = card.querySelector('.btn-add-cart');
+                if (addBtn) {
+                    addBtn.outerHTML = `<a href="/cart" class="btn btn-sm text-white flex-grow-1" style="background:#27AE60;">
+                        <i class="bi bi-basket me-1"></i>Xem giỏ</a>`;
+                }
+                // Thêm badge "Đã trong giỏ"
+                const serialSpan = card.querySelector('.font-monospace');
+                if (serialSpan && !card.querySelector('.badge')) {
+                    serialSpan.insertAdjacentHTML('afterend',
+                        `<span class="badge ms-auto" style="background:#27AE60;"><i class="bi bi-basket me-1"></i>Đã trong giỏ</span>`);
+                }
+            }
+            toastMsg.innerHTML = `<i class="bi bi-basket me-2"></i>Đã thêm "<strong>${eqName}</strong>" (${eqSerial}) vào giỏ!`;
+            document.getElementById('cartToast').style.background = '#27AE60';
+            // Cập nhật badge count trong header
+            document.querySelectorAll('[data-cart-badge]').forEach(el => {
+                el.textContent = data.count;
+                el.classList.remove('d-none');
+                el.style.display = '';
+            });
+        }
+        toast.show();
+    })
+    .catch(() => {
+        toastMsg.innerHTML = '<i class="bi bi-exclamation-triangle me-2"></i>Có lỗi xảy ra.';
+        document.getElementById('cartToast').style.background = '#E74C3C';
+        toast.show();
+    });
 });
 </script>
 {% endblock %}
-
