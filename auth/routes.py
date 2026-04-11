@@ -2,6 +2,8 @@
 auth/routes.py — Module xác thực (Thành viên C đảm nhận)
 Routes: /login  /register  /logout  /search
 """
+from urllib.parse import urlparse, urljoin
+
 from flask import render_template, redirect, url_for, flash, request
 from flask_login import login_user, logout_user, login_required, current_user
 
@@ -24,11 +26,17 @@ def login():
         password = request.form.get('password', '')
         remember = bool(request.form.get('remember'))
 
+        if not username or not password:
+            flash('Vui lòng nhập tên đăng nhập và mật khẩu.', 'danger')
+            return render_template('auth/login.html')
+
         user = User.query.filter_by(username=username).first()
         if user and bcrypt.check_password_hash(user.password_hash, password):
             login_user(user, remember=remember)
             flash(f'Xin chào, {user.username}! 👋', 'success')
-            next_page = request.args.get('next')
+            next_page = request.args.get('next', '').strip()
+            if not _is_safe_next_url(next_page):
+                next_page = ''
             return redirect(next_page) if next_page else _redirect_by_role()
         else:
             flash('Tên đăng nhập hoặc mật khẩu không đúng.', 'danger')
@@ -54,6 +62,10 @@ def register():
         # Basic validation
         if not username or not email or not password:
             flash('Vui lòng điền đầy đủ thông tin.', 'danger')
+        elif len(username) < 3:
+            flash('Tên đăng nhập phải có ít nhất 3 ký tự.', 'danger')
+        elif '@' not in email or '.' not in email.split('@')[-1]:
+            flash('Email không hợp lệ.', 'danger')
         elif password != confirm_password:
             flash('Mật khẩu xác nhận không khớp.', 'danger')
         elif len(password) < 6:
@@ -91,7 +103,10 @@ def logout():
 @auth_bp.route('/search')
 @login_required
 def search():
-    # TODO (Thành viên C): Hoàn thiện logic tìm kiếm nâng cao
+    # Route tìm kiếm dành cho student; admin dùng dashboard riêng
+    if current_user.role == 'admin':
+        return redirect(url_for('admin.dashboard'))
+
     q           = request.args.get('q', '').strip()
     category_id = request.args.get('category', type=int)
 
@@ -106,7 +121,8 @@ def search():
     return render_template('user/index.html',
                            equipments=equipments,
                            categories=categories,
-                           query=q)
+                           query=q,
+                           selected_category=category_id)
 
 
 # ─────────────────────────────────────────────
@@ -116,4 +132,13 @@ def _redirect_by_role():
     if current_user.role == 'admin':
         return redirect(url_for('admin.dashboard'))
     return redirect(url_for('user.index'))
+
+
+def _is_safe_next_url(target):
+    if not target:
+        return False
+    ref_url = urlparse(request.host_url)
+    test_url = urlparse(urljoin(request.host_url, target))
+    return test_url.scheme in ('http', 'https') and ref_url.netloc == test_url.netloc
+
 

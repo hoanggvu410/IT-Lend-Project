@@ -116,10 +116,24 @@
 
 {% block scripts %}
 <script>
-// TODO (Thành viên C): Validation ngày trả phải > ngày mượn
-document.getElementById('borrowDate')?.addEventListener('change', function () {
-    const returnInput = document.getElementById('returnDate');
-    if (returnInput) returnInput.min = this.value;
+const borrowInput = document.getElementById('borrowDate');
+const returnInput = document.getElementById('returnDate');
+const borrowForm = document.getElementById('borrowForm');
+
+borrowInput?.addEventListener('change', function () {
+    if (returnInput) {
+        returnInput.min = this.value;
+    }
+});
+
+borrowForm?.addEventListener('submit', function (event) {
+    if (!borrowInput || !returnInput || !borrowInput.value || !returnInput.value) {
+        return;
+    }
+    if (returnInput.value <= borrowInput.value) {
+        event.preventDefault();
+        alert('Ngày trả phải sau ngày mượn.');
+    }
 });
 </script>
 {% endblock %}
